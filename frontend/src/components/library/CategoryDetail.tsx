@@ -9,7 +9,7 @@ import { useToggleTodo } from "@/hooks/useToggleTodo";
 import { apiFetch, swrFetcher } from "@/lib/api";
 import { buildCard } from "@/lib/render-spec";
 import type {
-  ContactsResponse, EventsResponse, FilesResponse,
+  ContactsResponse, EventsResponse,
 } from "@/lib/types";
 
 import { SkillCard } from "@/components/skill/SkillCard";
@@ -20,7 +20,7 @@ import { AssetDetailDrawer } from "@/components/asset/AssetDetailDrawer";
  *
  * Driven by the URL param `:skillName`. For asset-backed skills
  * (todo/idea/notes/misc/expense/contact-as-asset) we hit /api/assets with
- * filter. For first-class entity types (event/file/contact) we hit their
+ * filter. For first-class entity types (event/contact) we hit their
  * dedicated endpoints and synthesize CardData inline using a hardcoded
  * "fake render_spec" that matches what we'd seed if they were skills.
  *
@@ -28,7 +28,7 @@ import { AssetDetailDrawer } from "@/components/asset/AssetDetailDrawer";
  */
 /** System / first-class skills the user can't delete from the UI. */
 const PROTECTED_SKILLS = new Set([
-  "event", "file", "contact", "external_ref", "qa",
+  "event", "contact", "external_ref", "qa",
   "todo", "idea", "notes", "expense", "misc",
 ]);
 
@@ -49,16 +49,14 @@ export function CategoryDetail() {
   // only a timeline reference. Always read from contacts table for the
   // library view.
   const isEvent   = skillName === "event";
-  const isFile    = skillName === "file";
   const isContact = skillName === "contact";
 
   const assetsHook = useAssets({
-    skillName: !isEvent && !isFile && !isContact ? skillName : undefined,
+    skillName: !isEvent && !isContact ? skillName : undefined,
     limit: 200,
   });
 
   const eventsSWR = useSWR<EventsResponse>(isEvent ? "/api/events" : null, swrFetcher);
-  const filesSWR  = useSWR<FilesResponse>(isFile ? "/api/files" : null, swrFetcher);
   const contactsSWR = useSWR<ContactsResponse>(isContact ? "/api/contacts" : null, swrFetcher);
 
   const titleText = skill?.display_name ?? FALLBACK_LABEL[skillName] ?? skillName;
@@ -90,28 +88,6 @@ export function CategoryDetail() {
         assetId: ev.event_id,
         cardType: "event",
         displayName: "事件",
-      }),
-    }));
-  } else if (isFile) {
-    cards = (filesSWR.data?.files ?? []).map((f) => ({
-      id: f.id,
-      payload: f as unknown as Record<string, unknown>,
-      data: buildCard({
-        payload: { ...f, label: fileLabel(f) } as Record<string, unknown>,
-        spec: {
-          card_layout: "horizontal",
-          icon: "📎",
-          accent_color: "gray",
-          primary_field: "label",
-          secondary_field: "file_type",
-          meta_fields: [
-            { field: "asr_status" },
-            { field: "asset_count", format: "badge" },
-          ],
-        },
-        assetId: f.id,
-        cardType: "file",
-        displayName: "文件",
       }),
     }));
   } else if (isContact) {
@@ -148,7 +124,7 @@ export function CategoryDetail() {
     }));
   }
 
-  const loading = assetsHook.isLoading || eventsSWR.isLoading || filesSWR.isLoading || contactsSWR.isLoading;
+  const loading = assetsHook.isLoading || eventsSWR.isLoading || contactsSWR.isLoading;
   const empty = !loading && cards.length === 0;
 
   const selectedEntry =
@@ -324,19 +300,8 @@ function DeleteSkillDialog({
 
 const FALLBACK_LABEL: Record<string, string> = {
   event:   "事件",
-  file:    "文件",
   contact: "联系人",
 };
-
-function fileLabel(f: { source_tag: string | null; created_at: string }): string {
-  // Files don't carry a user-visible name natively — synthesize one
-  const tag = f.source_tag === "flash" ? "🎙 闪念录音"
-            : f.source_tag === "meeting" ? "📁 会议录音"
-            : "📎 文件";
-  const d = new Date(f.created_at);
-  const date = `${d.getMonth() + 1}/${d.getDate()}`;
-  return `${tag} · ${date}`;
-}
 
 function SkeletonList() {
   return (

@@ -21,7 +21,7 @@ import type { ReactNode } from "react";
  * longer needs its own 「在 chat 里讨论」 — the dock IS the agent entry.
  */
 export interface AgentTarget {
-  subject: { type: "asset" | "event" | "contact" | "file"; id: string };
+  subject: { type: "asset" | "event" | "contact"; id: string };
   label: string;
 }
 

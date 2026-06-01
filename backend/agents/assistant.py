@@ -225,7 +225,7 @@ def make_assistant_agent(
     v1.4: if event_id is set (chat-from-event flow), inject a hint so the
     agent treats this chat as anchored to that event — it can call
     tool_get_event(event_id) to fetch full context, tool_update_event /
-    tool_add_event_attendee / tool_link_event_file to act on it.
+    tool_add_event_attendee to act on it.
 
     Stateless — instantiate per request. Tools (the shared MCPToolset)
     are cheap to attach since the underlying subprocess is a singleton.
@@ -298,8 +298,8 @@ def make_assistant_agent(
             "  → 本轮 chat **锚定到这个 event**。用户可能问「这个会议的参与人有谁」、\n"
             "    「帮我准备会前调研」、「改一下会议时间」等。需要 event 详细信息时\n"
             "    调 tool_get_event(event_id) 拿(title / start_at / location /\n"
-            "    attendees / files);需要操作时用 tool_update_event /\n"
-            "    tool_add_event_attendee / tool_link_event_file 等。\n"
+            "    attendees);需要操作时用 tool_update_event /\n"
+            "    tool_add_event_attendee 等。\n"
         )
     return LlmAgent(
         name="assistant",

@@ -44,7 +44,6 @@ class FlashRequest(BaseModel):
     text: str
     session_id: str = ""     # empty = get-or-create today's flash session
     source: str = "voice"    # voice | typed (per Phase B v1.3 modality)
-    file_id: str = ""        # optional, when real audio upload exists (future)
 
 
 class ListeningRequest(BaseModel):

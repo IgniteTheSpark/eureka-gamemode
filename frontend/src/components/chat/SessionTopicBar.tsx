@@ -9,7 +9,7 @@ import { patchSessionContext } from "@/hooks/useSessions";
 import { swrFetcher } from "@/lib/api";
 import { buildCard } from "@/lib/render-spec";
 import type {
-  AssetsResponse, ContactsResponse, EventsResponse, FilesResponse,
+  AssetsResponse, ContactsResponse, EventsResponse,
 } from "@/lib/types";
 import type { AccentColor, CardData } from "@/lib/render-spec";
 
@@ -34,8 +34,7 @@ import type { AccentColor, CardData } from "@/lib/render-spec";
  *   - 「+ 添加资产」: dashed border at the end, opens AssetPickerSheet.
  *
  * Subject sources (exactly one non-null determines it):
- *   contact_id (Kevin) | event_id (会议) | file_id (录音) |
- *   subject_asset_id (any asset)
+ *   contact_id (Kevin) | event_id (会议) | subject_asset_id (any asset)
  *
  * General-chat sessions (no subject FK) render just the context chips +
  * add button — the bar shrinks to "just additive context".
@@ -44,7 +43,6 @@ import type { AccentColor, CardData } from "@/lib/render-spec";
 interface SessionTopicBarProps {
   contactId?:        string | null;
   eventId?:          string | null;
-  fileId?:           string | null;
   subjectAssetId?:   string | null;
   /** Current session's context_asset_ids (M2.2) */
   contextAssetIds:   string[];
@@ -67,7 +65,7 @@ interface ChipData {
 }
 
 export function SessionTopicBar({
-  contactId, eventId, fileId, subjectAssetId,
+  contactId, eventId, subjectAssetId,
   contextAssetIds, sessionId,
 }: SessionTopicBarProps) {
   const { bySkill } = useSkillRegistry();
@@ -79,7 +77,6 @@ export function SessionTopicBar({
   // ── Fetch any/all data sources lazily (SWR keys are null when not needed). ─
   const contactsSWR = useSWR<ContactsResponse>(contactId      ? "/api/contacts"          : null, swrFetcher);
   const eventsSWR   = useSWR<EventsResponse>(eventId          ? "/api/events"            : null, swrFetcher);
-  const filesSWR    = useSWR<FilesResponse>(fileId            ? "/api/files"             : null, swrFetcher);
   const assetsSWR   = useSWR<AssetsResponse>(
     (subjectAssetId || contextAssetIds.length > 0) ? "/api/assets?limit=500" : null,
     swrFetcher,
@@ -87,9 +84,9 @@ export function SessionTopicBar({
 
   // ── Build subject chip ────────────────────────────────────────────────
   const subject = buildSubjectChip({
-    contactId, eventId, fileId, subjectAssetId,
+    contactId, eventId, subjectAssetId,
     contactsSWR: contactsSWR.data, eventsSWR: eventsSWR.data,
-    filesSWR: filesSWR.data, assetsSWR: assetsSWR.data, bySkill,
+    assetsSWR: assetsSWR.data, bySkill,
   });
 
   // ── Build context chips ───────────────────────────────────────────────
@@ -290,13 +287,13 @@ function ContextChip({
 
 function buildSubjectChip(args: {
   contactId?: string | null; eventId?: string | null;
-  fileId?: string | null; subjectAssetId?: string | null;
+  subjectAssetId?: string | null;
   contactsSWR?: ContactsResponse; eventsSWR?: EventsResponse;
-  filesSWR?: FilesResponse; assetsSWR?: AssetsResponse;
+  assetsSWR?: AssetsResponse;
   bySkill: ReturnType<typeof useSkillRegistry>["bySkill"];
 }): ChipData | null {
-  const { contactId, eventId, fileId, subjectAssetId,
-          contactsSWR, eventsSWR, filesSWR, assetsSWR, bySkill } = args;
+  const { contactId, eventId, subjectAssetId,
+          contactsSWR, eventsSWR, assetsSWR, bySkill } = args;
   if (contactId) {
     const c = contactsSWR?.contacts?.find((x) => x.id === contactId);
     if (!c) return null;
@@ -314,18 +311,6 @@ function buildSubjectChip(args: {
       id: e.event_id, icon: "📅", accent: "purple", title: e.title,
       payload: e as unknown as Record<string, unknown>,
       cardType: "event", displayName: e.title, sourceSessionId: null,
-      isSubject: true,
-    };
-  }
-  if (fileId) {
-    const f = filesSWR?.files?.find((x) => x.id === fileId);
-    if (!f) return null;
-    const label = f.source_tag === "flash" ? "🎙 闪念录音"
-                : f.source_tag === "meeting" ? "📁 会议录音" : "📎 文件";
-    return {
-      id: f.id, icon: "📎", accent: "gray", title: label,
-      payload: f as unknown as Record<string, unknown>,
-      cardType: "file", displayName: label, sourceSessionId: null,
       isSubject: true,
     };
   }

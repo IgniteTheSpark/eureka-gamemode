@@ -26,7 +26,7 @@ from core.auth import get_current_user_id
 from db.database import AsyncSessionLocal
 from db.models import (
     Session as DBSession, Asset, GlobalSkill, InputTurn, Message, UserSkill,
-    Contact, Event, File,
+    Contact, Event,
 )
 
 router = APIRouter()
@@ -279,7 +279,6 @@ async def get_session(
             # M2.3: subject FKs — exactly one is non-null for home sessions
             "event_id":         str(sess.event_id) if sess.event_id else None,
             "contact_id":       str(sess.contact_id) if sess.contact_id else None,
-            "file_id":          str(sess.file_id) if sess.file_id else None,
             "subject_asset_id": str(sess.subject_asset_id) if sess.subject_asset_id else None,
             "asset_count":  asset_count,
             "turn_count":   turn_count,
@@ -366,8 +365,6 @@ async def get_session_input_turns(
                 "index":               t.index,
                 "source":              t.source,
                 "text":                t.text,
-                "file_id":             str(t.file_id) if t.file_id else None,
-                "source_file_offset":  t.source_file_offset,
                 "created_at":          t.created_at.isoformat(),
             }
             for t in turns
@@ -379,13 +376,11 @@ async def get_session_input_turns(
 # Subject FK columns map (M2.3 → consolidated into POST /sessions in M3.5):
 #   contact → sessions.contact_id
 #   event   → sessions.event_id
-#   file    → sessions.file_id
 #   asset   → sessions.subject_asset_id  (any asset-skill row)
 
 SUBJECT_FK_COLUMN = {
     "contact": "contact_id",
     "event":   "event_id",
-    "file":    "file_id",
     "asset":   "subject_asset_id",
 }
 
@@ -398,9 +393,6 @@ async def _derive_subject_title(db, subject_type: str, subject_id) -> str:
     if subject_type == "event":
         e = (await db.execute(select(Event).where(Event.id == subject_id))).scalar_one_or_none()
         return f"{e.title}" if e and e.title else "事件对话"
-    if subject_type == "file":
-        f = (await db.execute(select(File).where(File.id == subject_id))).scalar_one_or_none()
-        return f"文件 · {(f.file_type or '?') if f else '?'}"
     if subject_type == "asset":
         a = (await db.execute(select(Asset).where(Asset.id == subject_id))).scalar_one_or_none()
         if a and a.payload:

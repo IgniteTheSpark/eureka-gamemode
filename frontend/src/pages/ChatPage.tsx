@@ -257,7 +257,6 @@ export function ChatPage() {
             <SessionTopicBar
               contactId={sessionDetail?.contact_id ?? (pendingSubject?.type === "contact" ? pendingSubject.id : null)}
               eventId={sessionDetail?.event_id ?? (pendingSubject?.type === "event" ? pendingSubject.id : null)}
-              fileId={sessionDetail?.file_id ?? (pendingSubject?.type === "file" ? pendingSubject.id : null)}
               subjectAssetId={sessionDetail?.subject_asset_id ?? (pendingSubject?.type === "asset" ? pendingSubject.id : null)}
               contextAssetIds={sessionDetail?.context_asset_ids ?? []}
               sessionId={activeSessionId}

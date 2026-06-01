@@ -22,7 +22,7 @@ from sqlalchemy import select, Text
 
 from db.models import (
     Asset, AssetField, Contact, UserSkill, GlobalSkill, InputTurn,
-    Event, EventAttendee, EventFile,                                  # v1.4
+    Event, EventAttendee,                                             # v1.4
 )
 from db.queries import index_asset_fields
 from db.database import AsyncSessionLocal
@@ -462,7 +462,6 @@ async def query_input_turn(
             "source":        t.source,
             "snippet":       (t.text[:200] + "…") if len(t.text) > 200 else t.text,
             "full_text_len": len(t.text),
-            "file_id":       str(t.file_id) if t.file_id else None,
             "created_at":    t.created_at.isoformat(),
         }
         for t in turns
@@ -493,8 +492,6 @@ async def get_input_turn(input_turn_id: str, user_id: str = "default") -> dict:
         source=turn.source,
         text=turn.text,
         segments=turn.segments,
-        file_id=str(turn.file_id) if turn.file_id else None,
-        source_file_offset=turn.source_file_offset,
         asr_provider=turn.asr_provider,
         language=turn.language,
         created_at=turn.created_at.isoformat(),
@@ -503,8 +500,8 @@ async def get_input_turn(input_turn_id: str, user_id: str = "default") -> dict:
 
 # ── Event tools (v1.4: Event is a first-class entity) ────────────────────────
 
-def _event_to_dict(event: Event, attendees: list = None, files: list = None) -> dict:
-    """Serialize an Event row plus optional joined attendees/files."""
+def _event_to_dict(event: Event, attendees: list = None) -> dict:
+    """Serialize an Event row plus optional joined attendees."""
     return {
         "event_id":        str(event.id),
         "title":           event.title,
@@ -519,7 +516,6 @@ def _event_to_dict(event: Event, attendees: list = None, files: list = None) -> 
         "source_input_turn_id": str(event.source_input_turn_id) if event.source_input_turn_id else None,
         "created_at":      event.created_at.isoformat() if event.created_at else None,
         "attendees":       attendees if attendees is not None else None,
-        "files":           files if files is not None else None,
     }
 
 
@@ -582,7 +578,7 @@ async def create_event(
         await db.commit()
         await db.refresh(event)
 
-    return _ok(**_event_to_dict(event, attendees=[], files=[]))
+    return _ok(**_event_to_dict(event, attendees=[]))
 
 
 async def query_event(
@@ -620,10 +616,9 @@ async def query_event(
         result = await db.execute(stmt)
         events = result.scalars().all()
 
-        # Fetch attendees + files for each (one batched query each)
+        # Fetch attendees for each (one batched query)
         event_ids = [e.id for e in events]
         attendees_by_event = {eid: [] for eid in event_ids}
-        files_by_event = {eid: [] for eid in event_ids}
         if event_ids:
             atts = (await db.execute(
                 select(EventAttendee).where(EventAttendee.event_id.in_(event_ids))
@@ -635,24 +630,15 @@ async def query_event(
                     "name":        a.name_raw,
                     "role":        a.role,
                 })
-            efs = (await db.execute(
-                select(EventFile).where(EventFile.event_id.in_(event_ids))
-            )).scalars().all()
-            for f in efs:
-                files_by_event[f.event_id].append({
-                    "event_file_id": str(f.id),
-                    "file_id":       str(f.file_id),
-                    "kind":          f.kind,
-                })
 
     return _ok(events=[
-        _event_to_dict(e, attendees=attendees_by_event[e.id], files=files_by_event[e.id])
+        _event_to_dict(e, attendees=attendees_by_event[e.id])
         for e in events
     ])
 
 
 async def get_event(event_id: str, user_id: str = "default") -> dict:
-    """Fetch a single event by id, with attendees and files inline."""
+    """Fetch a single event by id, with attendees inline."""
     async with AsyncSessionLocal() as db:
         result = await db.execute(
             select(Event).where(Event.id == uuid.UUID(event_id), Event.user_id == user_id)
@@ -663,9 +649,6 @@ async def get_event(event_id: str, user_id: str = "default") -> dict:
         atts = (await db.execute(
             select(EventAttendee).where(EventAttendee.event_id == event.id)
         )).scalars().all()
-        efs = (await db.execute(
-            select(EventFile).where(EventFile.event_id == event.id)
-        )).scalars().all()
     return _ok(**_event_to_dict(
         event,
         attendees=[{
@@ -674,11 +657,6 @@ async def get_event(event_id: str, user_id: str = "default") -> dict:
             "name":        a.name_raw,
             "role":        a.role,
         } for a in atts],
-        files=[{
-            "event_file_id": str(f.id),
-            "file_id":       str(f.file_id),
-            "kind":          f.kind,
-        } for f in efs],
     ))
 
 
@@ -727,7 +705,7 @@ async def update_event(
 
 
 async def delete_event(event_id: str, user_id: str = "default") -> dict:
-    """Delete an event. Cascades to event_attendees and event_files."""
+    """Delete an event. Cascades to event_attendees."""
     async with AsyncSessionLocal() as db:
         result = await db.execute(
             select(Event).where(Event.id == uuid.UUID(event_id), Event.user_id == user_id)
@@ -779,29 +757,3 @@ async def add_event_attendee(
         name=att.name_raw,
         role=att.role,
     )
-
-
-async def link_event_file(
-    event_id: str,
-    file_id: str,
-    kind: str = "attachment",
-    user_id: str = "default",
-) -> dict:
-    """Link a file (audio/doc/note) to an event. kind: prep/recording/notes/attachment."""
-    async with AsyncSessionLocal() as db:
-        ev = (await db.execute(
-            select(Event).where(Event.id == uuid.UUID(event_id), Event.user_id == user_id)
-        )).scalar_one_or_none()
-        if not ev:
-            return _err(f"event not found: {event_id}")
-
-        ef = EventFile(
-            event_id=uuid.UUID(event_id),
-            file_id=uuid.UUID(file_id),
-            kind=kind,
-        )
-        db.add(ef)
-        await db.commit()
-        await db.refresh(ef)
-
-    return _ok(event_file_id=str(ef.id), event_id=event_id, file_id=file_id, kind=kind)

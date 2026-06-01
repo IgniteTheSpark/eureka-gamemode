@@ -34,7 +34,6 @@ from api.chat import router as chat_router
 from api.flash import router as flash_router
 from api.skills import router as skills_router
 from api.input_turns import router as input_turns_router
-from api.files import router as files_router
 from api.assets import router as assets_router
 from api.sessions import router as sessions_router
 from api.contacts import router as contacts_router
@@ -75,7 +74,6 @@ app.include_router(chat_router,        prefix="/api", tags=["chat"])
 app.include_router(flash_router,       prefix="/api", tags=["flash"])
 app.include_router(skills_router,      prefix="/api", tags=["skills"])
 app.include_router(input_turns_router, prefix="/api", tags=["input-turns"])
-app.include_router(files_router,       prefix="/api", tags=["files"])
 app.include_router(assets_router,      prefix="/api", tags=["assets"])
 app.include_router(sessions_router,    prefix="/api", tags=["sessions"])
 app.include_router(contacts_router,    prefix="/api", tags=["contacts"])

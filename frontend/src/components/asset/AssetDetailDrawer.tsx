@@ -65,7 +65,6 @@ export function AssetDetailDrawer({ card, payload, onClose, sourceSessionId }: A
     if (!card.assetId) return;
     const subjectType = card.cardType === "contact" ? "contact"
       : card.cardType === "event" ? "event"
-      : card.cardType === "file" ? "file"
       : "asset";
     setAgentTarget({ subject: { type: subjectType, id: card.assetId }, label: card.title });
     return () => setAgentTarget(null);

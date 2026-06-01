@@ -60,10 +60,10 @@ export function useSessionDetail(sessionId: string | null | undefined) {
 
 /**
  * Subject types supported by the unified POST /api/sessions endpoint.
- * Each maps to a FK column on sessions (contact_id / event_id / file_id /
+ * Each maps to a FK column on sessions (contact_id / event_id /
  * subject_asset_id).
  */
-export type SubjectType = "contact" | "event" | "file" | "asset";
+export type SubjectType = "contact" | "event" | "asset";
 
 /**
  * openSession — M3.5 unified session-open helper.

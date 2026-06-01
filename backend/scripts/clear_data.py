@@ -8,11 +8,10 @@ clear_data.py — 清空所有用户数据(保留 Skill 定义和 users)
   docker exec eureka-brandnew-backend-1 python scripts/clear_data.py --force
 
 M3.5 更新:覆盖到所有 M2.x / M3.x 引入的表
-(input_turns / messages / events / event_attendees / event_files / files / tasks)。
+(input_turns / messages / events / event_attendees / tasks)。
 
 清空顺序遵守 FK 依赖(子表先删,父表后删):
   asset_fields  → assets       (asset_fields.asset_id ON CASCADE)
-  event_files   → events       (event_files.event_id  ON CASCADE)
   event_attendees → events     (event_attendees.event_id ON CASCADE)
   messages      → sessions     (messages.session_id    ON CASCADE)
   input_turns   → sessions     (input_turns.session_id ON CASCADE)
@@ -20,7 +19,6 @@ M3.5 更新:覆盖到所有 M2.x / M3.x 引入的表
   assets        → sessions, user_skills
   contacts      → user_skills
   events        → (independent)
-  files         → (independent)
   sessions      → (last — depended on by many)
 
 保留:
@@ -51,7 +49,6 @@ from sqlalchemy import text
 TABLES_TO_CLEAR = [
     # leaf / join tables first
     "asset_fields",
-    "event_files",
     "event_attendees",
     "messages",
     "input_turns",
@@ -61,7 +58,6 @@ TABLES_TO_CLEAR = [
     # independent first-class entities
     "contacts",
     "events",
-    "files",
     # last — all the FKs above point here
     "sessions",
 ]

@@ -63,7 +63,6 @@ export interface Event {
     name: string;
     role: string;
   }>;
-  files?: unknown[];
 }
 
 export interface EventsResponse {
@@ -108,25 +107,6 @@ export interface TimelineResponse {
   items: TimelineItem[];
 }
 
-/* ── /api/files ─────────────────────────────────────────────────────────── */
-
-export interface FileRow {
-  id: string;
-  file_type: string | null;
-  source_tag: string | null;
-  duration_sec: number | null;
-  asr_status: string | null;
-  asr_text: string | null;
-  turn_count: number;
-  asset_count: number;
-  created_at: string;
-}
-
-export interface FilesResponse {
-  ok: boolean;
-  files: FileRow[];
-}
-
 /* ── /api/contacts ──────────────────────────────────────────────────────── */
 
 export interface Contact {
@@ -167,7 +147,6 @@ export interface SessionDetail {
   // M2.3 subject FKs — exactly one is non-null for home discussion sessions
   event_id:         string | null;
   contact_id:       string | null;
-  file_id:          string | null;
   subject_asset_id: string | null;
   asset_count: number;
   turn_count: number;

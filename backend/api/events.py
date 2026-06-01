@@ -27,7 +27,7 @@ from typing import Optional
 from core.auth import get_current_user_id
 from mcp_server.tools import (
     create_event, query_event, get_event, update_event, delete_event,
-    add_event_attendee, link_event_file,
+    add_event_attendee,
 )
 
 router = APIRouter()
@@ -61,11 +61,6 @@ class AttendeeCreate(BaseModel):
     name:       Optional[str] = ""
     contact_id: Optional[str] = ""
     role:       Optional[str] = "attendee"  # organizer | attendee | optional
-
-
-class EventFileLink(BaseModel):
-    file_id: str
-    kind:    Optional[str] = "attachment"   # prep | recording | notes | attachment
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
@@ -163,22 +158,4 @@ async def add_attendee_endpoint(
     if not result.get("ok"):
         code = 404 if "not found" in result.get("error", "") else 400
         raise HTTPException(status_code=code, detail=result.get("error", "add attendee failed"))
-    return result
-
-
-@router.post("/events/{event_id}/files")
-async def link_file_endpoint(
-    event_id: str,
-    body:     EventFileLink,
-    user_id:  str = Depends(get_current_user_id),
-):
-    result = await link_event_file(
-        event_id=event_id,
-        file_id=body.file_id,
-        kind=body.kind or "attachment",
-        user_id=user_id,
-    )
-    if not result.get("ok"):
-        code = 404 if "not found" in result.get("error", "") else 400
-        raise HTTPException(status_code=code, detail=result.get("error", "link file failed"))
     return result

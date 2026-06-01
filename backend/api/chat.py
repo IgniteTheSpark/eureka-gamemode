@@ -214,7 +214,7 @@ async def chat(req: ChatRequest, user_id: str = Depends(get_current_user_id)):
                 db, session_id, user_id,
             )
             # M2.3: subject hint = the entity/asset this session is anchored to
-            # (sessions.contact_id / event_id / file_id / subject_asset_id).
+            # (sessions.contact_id / event_id / subject_asset_id).
             # Distinct from context (additive) and assets_hint (in-session created).
             session_subject_hint = await load_session_subject_hint(
                 db, session_id, user_id,

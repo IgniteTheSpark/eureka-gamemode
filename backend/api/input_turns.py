@@ -51,8 +51,6 @@ async def get_input_turn(
             "source":              turn.source,
             "text":                turn.text,
             "segments":            turn.segments,
-            "file_id":             str(turn.file_id) if turn.file_id else None,
-            "source_file_offset":  turn.source_file_offset,
             "asr_provider":        turn.asr_provider,
             "language":            turn.language,
             "created_at":          turn.created_at.isoformat(),

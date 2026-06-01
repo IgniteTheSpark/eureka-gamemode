@@ -9,7 +9,7 @@ import { buildCard } from "@/lib/render-spec";
 import type { AccentColor } from "@/lib/render-spec";
 import type {
   Asset, AssetsResponse, ContactsResponse, Event,
-  EventsResponse, FileRow, FilesResponse,
+  EventsResponse,
 } from "@/lib/types";
 import { useSkillRegistry } from "@/hooks/useSkillRegistry";
 import { useToggleTodo } from "@/hooks/useToggleTodo";
@@ -58,7 +58,6 @@ import { useToggleTodo } from "@/hooks/useToggleTodo";
  *   - todo / idea / expense / notes / misc → /api/assets filtered by user_skill_name
  *   - contact → /api/contacts (real contacts table)
  *   - event   → /api/events
- *   - file    → /api/files
  *
  * Preview text = latest item's title-ish field (per skill).
  */
@@ -84,7 +83,7 @@ const LIB_ACCENT: Record<LibAccent, { fg: string; bg: string; edge: string; glow
 
 // OP9: type tiles split into two semantic sections.
 // 「核心」 = first-class entities that exist regardless of user skills
-//   (event / contact / file — backed by their own tables).
+//   (event / contact — backed by their own tables).
 // 「我的技能」 = user-extensible skill assets (todo / expense / idea /
 //   notes / misc) — these evolve over time as user adds new skill types
 //   via the AddSkillWizard. The 添加新技能 tile sits at the end of this
@@ -92,7 +91,6 @@ const LIB_ACCENT: Record<LibAccent, { fg: string; bg: string; edge: string; glow
 const CORE_TILES: TileKind[] = [
   { key: "event",        to: "/library/event",        label: "事件", icon: "●",  accent: "purple"  },
   { key: "contact",      to: "/library/contact",      label: "名片", icon: "◯",  accent: "neutral" },
-  { key: "file",         to: "/library/file",         label: "文件", icon: "♪",  accent: "cyan"    },
   // 外部引用 — pointers to things created in third-party systems (Notion /
   // 钉钉 / Google Calendar) via the task-skill MCP. A first-class entity like
   // event/contact/file, so it lives here in 常驻 rather than the skills grid.
@@ -129,7 +127,6 @@ export function CategoryList() {
   // Pull everything in parallel; SWR dedupes across the hub + drill-down pages.
   const allAssets = useSWR<AssetsResponse>("/api/assets?limit=500", swrFetcher);
   const events    = useSWR<EventsResponse>("/api/events", swrFetcher);
-  const files     = useSWR<FilesResponse>("/api/files", swrFetcher);
   const contacts  = useSWR<ContactsResponse>("/api/contacts", swrFetcher);
 
   const assets = allAssets.data?.assets ?? [];
@@ -138,13 +135,13 @@ export function CategoryList() {
   // hub (asset-backed skills + first-class entities).
   const totalCount =
     assets.length + (events.data?.events?.length ?? 0) +
-    (files.data?.files?.length ?? 0) + (contacts.data?.contacts?.length ?? 0);
+    (contacts.data?.contacts?.length ?? 0);
 
-  // Build the 「最近」 cross-type list — newest 5 across asset / event / file
+  // Build the 「最近」 cross-type list — newest 5 across asset / event
   // (contacts aren't time-stamped meaningfully so they don't appear in this
   // "recent activity" list; they're reachable via the 名片 tile).
   const recent = buildRecent({
-    assets, events: events.data?.events ?? [], files: files.data?.files ?? [],
+    assets, events: events.data?.events ?? [],
     bySkillIcon: iconMap(skills),
   }, 8);
 
@@ -161,8 +158,8 @@ export function CategoryList() {
       label:         s.display_name || s.name,
       icon:          s.render_spec?.icon ?? "◇",
       accent:        RENDER_TO_GRID[s.render_spec?.accent_color ?? "neutral"] ?? "neutral",
-      count:         countFor(s.name, { assets, events: events.data?.events, files: files.data?.files, contacts: contacts.data?.contacts }),
-      preview:       previewFor(s.name, { assets, events: events.data?.events, files: files.data?.files, contacts: contacts.data?.contacts }),
+      count:         countFor(s.name, { assets, events: events.data?.events, contacts: contacts.data?.contacts }),
+      preview:       previewFor(s.name, { assets, events: events.data?.events, contacts: contacts.data?.contacts }),
       deletable:     !PROTECTED_SKILL_NAMES.has(s.name),
     }));
 
@@ -238,8 +235,8 @@ export function CategoryList() {
             <TypeTile
               key={t.key}
               tile={t}
-              count={countFor(t.key, { assets, events: events.data?.events, files: files.data?.files, contacts: contacts.data?.contacts })}
-              preview={previewFor(t.key, { assets, events: events.data?.events, files: files.data?.files, contacts: contacts.data?.contacts })}
+              count={countFor(t.key, { assets, events: events.data?.events, contacts: contacts.data?.contacts })}
+              preview={previewFor(t.key, { assets, events: events.data?.events, contacts: contacts.data?.contacts })}
             />
           ))}
         </div>
@@ -492,30 +489,22 @@ function iconMap(skills: ReturnType<typeof useSkillRegistry>["skills"]) {
 
 function countFor(
   key: string,
-  d: { assets: Asset[]; events?: Event[]; files?: FileRow[]; contacts?: ContactsResponse["contacts"] },
+  d: { assets: Asset[]; events?: Event[]; contacts?: ContactsResponse["contacts"] },
 ): number {
   if (key === "event")   return d.events?.length ?? 0;
-  if (key === "file")    return d.files?.length  ?? 0;
   if (key === "contact") return d.contacts?.length ?? 0;
   return d.assets.filter((a) => a.user_skill_name === key).length;
 }
 
 function previewFor(
   key: string,
-  d: { assets: Asset[]; events?: Event[]; files?: FileRow[]; contacts?: ContactsResponse["contacts"] },
+  d: { assets: Asset[]; events?: Event[]; contacts?: ContactsResponse["contacts"] },
 ): string {
   if (key === "event") {
     const e = d.events?.[0];
     if (!e) return "";
     const d2 = new Date(e.start_at);
     return `${e.title} · ${d2.getMonth() + 1}月${d2.getDate()}`;
-  }
-  if (key === "file") {
-    const f = d.files?.[0];
-    if (!f) return "";
-    const tag = f.source_tag === "flash" ? "闪念"
-              : f.source_tag === "meeting" ? "会议" : "上传";
-    return `${tag} · ${f.duration_sec ? `${Math.round(f.duration_sec)}s` : ""}`.trim();
   }
   if (key === "contact") {
     const c = d.contacts?.[0];
@@ -536,7 +525,7 @@ function previewFor(
 
 function buildRecent(
   d: {
-    assets: Asset[]; events: Event[]; files: FileRow[];
+    assets: Asset[]; events: Event[];
     bySkillIcon: Map<string, string>;
   },
   limit: number,
@@ -577,21 +566,6 @@ function buildRecent(
       event:    e,   // for unified EventCard rendering
     });
   }
-  for (const f of d.files) {
-    merged.push({
-      _ts:      +new Date(f.created_at),
-      id:       `file-${f.id}`,
-      to:       `/library/file`,
-      accent:   "cyan",
-      icon:     "♪",
-      kindCaps: (f.source_tag ?? "FILE").toUpperCase(),
-      title:    `${f.source_tag === "flash" ? "闪念录音" : f.source_tag === "meeting" ? "会议录音" : "文件"}`,
-      sub:      `${f.duration_sec ? `${Math.round(f.duration_sec)}s · ` : ""}${relativeTime(f.created_at)}`,
-      hasSource: false,
-      dayKey:   localDayKey(f.created_at),
-    });
-  }
-
   merged.sort((a, b) => b._ts - a._ts);
   return merged.slice(0, limit).map(({ _ts: _, ...rest }) => rest);
 }

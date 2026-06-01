@@ -1,28 +1,28 @@
 """
 SQLAlchemy models — Phase B v1.4 schema.
 
-12 tables:
-  global_skills, user_skills, sessions, files, input_turns,
+10 tables:
+  global_skills, user_skills, sessions, input_turns,
   assets, asset_fields, contacts, messages,
-  events, event_attendees, event_files   ← NEW in v1.4
+  events, event_attendees
 
 v1.4 changes (Event as first-class entity, like contacts):
 - Event no longer goes through assets table — it has its own structurally-
-  rich storage (start_at, end_at, location, recurrence, attendees, files)
+  rich storage (start_at, end_at, location, recurrence, attendees)
 - Sessions can be anchored to an event via Session.event_id (chat-about-event
   workflow: "帮我准备这个会议的人员调研")
 - event-skill (Flash Pipeline) now calls create_event MCP tool instead of
   create_asset; events surface in Calendar via dedicated EventCard, not SkillCard
 
 v1.3 baseline (kept):
-- File and InputTurn are first-class (InputTurn replaces old Transcript concept)
+- InputTurn is first-class (replaces old Transcript concept); it holds the
+  raw captured text — the audio File entity has been removed (gamemode strip)
 - Asset has source_input_turn_id FK; user_skill_id NOT NULL
 - Asset payload no longer carries asset_type (derived via user_skill_id → global_skills.name)
 - Message gains tool_call, tool_result columns
 - UserSkill gains display_name, render_spec (nullable for system skills like qa)
 - Session.session_type values: flash | chat | meeting | manual
 - input_turn.source values: voice | typed | imported (modality, NOT session_type)
-- file_id on InputTurn only, NOT on Session
 """
 from sqlalchemy import (
     Column, String, Integer, Numeric, Text, Date, ARRAY,
@@ -80,7 +80,6 @@ class Session(Base):
     # set per chat-discussion session (manual/flash sessions have none set).
     event_id          = Column(UUID(as_uuid=True), ForeignKey("events.id"))    # v1.4
     contact_id        = Column(UUID(as_uuid=True), ForeignKey("contacts.id"))  # M2.3
-    file_id           = Column(UUID(as_uuid=True), ForeignKey("files.id"))     # M2.3
     subject_asset_id  = Column(UUID(as_uuid=True), ForeignKey("assets.id"))    # M2.3
     # ── Additive context (M2.2) — assets pulled into discussion via
     # 「+ 添加资产」, mutable list. Distinct from subject FK above.
@@ -92,19 +91,6 @@ class Session(Base):
         Index("idx_sessions_user_type",  "user_id", "session_type", "created_at"),
         Index("idx_sessions_event",      "user_id", "event_id"),
     )
-
-
-class File(Base):
-    __tablename__ = "files"
-
-    id           = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id      = Column(String(50), nullable=False)
-    storage_url  = Column(Text)
-    file_type    = Column(String(50))
-    duration_sec = Column(Integer)
-    source_tag   = Column(String(20))   # flash | meeting
-    asr_status   = Column(String(20))   # pending | processing | completed | failed
-    created_at   = Column(TIMESTAMPTZ, server_default=func.now())
 
 
 class InputTurn(Base):
@@ -133,8 +119,6 @@ class InputTurn(Base):
     user_id            = Column(String(50), nullable=False)
     session_id         = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
     index              = Column(Integer, nullable=False)             # 0-based position within session
-    file_id            = Column(UUID(as_uuid=True), ForeignKey("files.id"))   # nullable: typed / chat has no file
-    source_file_offset = Column(Integer)                              # ms in audio (meeting segment)
     text               = Column(Text, nullable=False)
     segments           = Column(JSONB)                                # optional speaker / per-token detail
     source             = Column(String(20), nullable=False)           # voice | typed | imported (modality, NOT session_type)
@@ -216,7 +200,6 @@ class Event(Base):
 
     Owns relations:
     - event_attendees: people invited (link to contacts when matched)
-    - event_files: pre-meeting docs, recordings, notes
     - sessions(event_id=event.id): chat sessions about this event
     """
     __tablename__ = "events"
@@ -258,22 +241,6 @@ class EventAttendee(Base):
     __table_args__ = (
         Index("idx_event_attendees_event",   "event_id"),
         Index("idx_event_attendees_contact", "contact_id"),
-    )
-
-
-class EventFile(Base):
-    """Join: event ↔ file (pre-meeting docs, recordings, notes attached to an event)."""
-    __tablename__ = "event_files"
-
-    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    event_id    = Column(UUID(as_uuid=True), ForeignKey("events.id", ondelete="CASCADE"), nullable=False)
-    file_id     = Column(UUID(as_uuid=True), ForeignKey("files.id"), nullable=False)
-    kind        = Column(String(20), server_default="attachment")   # prep | recording | notes | attachment
-    attached_at = Column(TIMESTAMPTZ, server_default=func.now())
-
-    __table_args__ = (
-        Index("idx_event_files_event", "event_id"),
-        UniqueConstraint("event_id", "file_id", name="uq_event_files"),
     )
 
 

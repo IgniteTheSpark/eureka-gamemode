@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.models import (
     Message, Session as DBSession, InputTurn,
     Asset, UserSkill, GlobalSkill, Event,
-    Contact, File,
+    Contact,
 )
 
 
@@ -101,8 +101,8 @@ async def create_input_turn_for_message(
       voice | typed | imported
 
     Default 'typed' fits the typed-message path; voice paths pass source='voice'
-    explicitly and usually a file_id too. Mixed modalities within one session
-    are supported — a flash session can have both voice and typed input_turns.
+    explicitly. Mixed modalities within one session are supported — a flash
+    session can have both voice and typed input_turns.
     """
     # Determine next index within session
     result = await db.execute(
@@ -378,7 +378,6 @@ async def load_session_subject_hint(
     Subjects are immutable home FKs:
       sessions.contact_id       → 1 contact
       sessions.event_id         → 1 event
-      sessions.file_id          → 1 file
       sessions.subject_asset_id → 1 asset (sub-asset type)
 
     The subject is the **focal point** of the conversation — the Agent
@@ -418,13 +417,6 @@ async def load_session_subject_hint(
                 f"- event (event_id={e.id}): 「{e.title}」 "
                 f"start={when} location={e.location or '-'}"
             )
-
-    if sess.file_id:
-        f = (await db.execute(
-            select(File).where(File.id == sess.file_id)
-        )).scalar_one_or_none()
-        if f:
-            return f"- file (file_id={f.id}): type={f.file_type} source={f.source_tag}"
 
     if sess.subject_asset_id:
         result = (await db.execute(

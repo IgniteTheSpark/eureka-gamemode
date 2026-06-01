@@ -23,7 +23,7 @@ from mcp_server.tools import (
     create_contact, query_contact, update_contact, delete_contact,
     query_input_turn, get_input_turn,
     create_event, query_event, get_event, update_event, delete_event,   # v1.4
-    add_event_attendee, link_event_file,                                  # v1.4
+    add_event_attendee,                                                   # v1.4
     render_report,                                                        # html-summary
 )
 
@@ -327,7 +327,7 @@ async def tool_update_event(event_id: str, patch: str) -> str:
 
 @mcp.tool()
 async def tool_delete_event(event_id: str) -> str:
-    """Delete an event. Cascades to event_attendees and event_files."""
+    """Delete an event. Cascades to event_attendees."""
     return _jsonify(await delete_event(event_id))
 
 
@@ -344,19 +344,6 @@ async def tool_add_event_attendee(
     role: organizer | attendee | optional
     """
     return _jsonify(await add_event_attendee(event_id, name, contact_id, role))
-
-
-@mcp.tool()
-async def tool_link_event_file(
-    event_id: str,
-    file_id: str,
-    kind: str = "attachment",
-) -> str:
-    """
-    Attach a file to an event. kind: prep | recording | notes | attachment
-    Use case: pre-meeting docs, post-meeting recording, summary notes.
-    """
-    return _jsonify(await link_event_file(event_id, file_id, kind))
 
 
 # ── v1.4.x: task-skill bridge ─────────────────────────────────────────────────

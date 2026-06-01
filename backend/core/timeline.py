@@ -23,8 +23,7 @@ Per-kind effective_at rule (table also lives in phase-b doc §三):
   expense asset     →  payload.date       | else created_at
   idea/notes/misc   →  created_at
   contact asset     →  created_at
-  input_turn        →  created_at  (flash: capture moment; async ASR: completion)
-  file              →  created_at  (upload moment)
+  input_turn        →  created_at  (flash: capture moment)
 
 The 「全部」 tab shows every kind interleaved by effective_at. Concrete-kind
 tabs (event / todo / expense / ...) typically use their own endpoints with
@@ -42,7 +41,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import (
-    Asset, UserSkill, GlobalSkill, Event, InputTurn, File,
+    Asset, UserSkill, GlobalSkill, Event, InputTurn,
 )
 
 
@@ -90,14 +89,9 @@ def effective_at_for_event(event: Event) -> datetime:
 def effective_at_for_input_turn(turn: InputTurn) -> datetime:
     """
     For flash: capture moment (= created_at when ASR is sync/inline).
-    For async ASR (meeting): row created when ASR completed (= created_at also).
     Same field in both cases.
     """
     return turn.created_at
-
-
-def effective_at_for_file(file: File) -> datetime:
-    return file.created_at
 
 
 # ── TimelineItem shape ────────────────────────────────────────────────────────
@@ -105,7 +99,7 @@ def effective_at_for_file(file: File) -> datetime:
 # based on `kind`. Fields not relevant to a kind are simply omitted.
 #
 # Common keys:
-#   kind:          "asset" | "event" | "input_turn" | "file"
+#   kind:          "asset" | "event" | "input_turn"
 #   id:            uuid
 #   effective_at:  ISO8601 + TZ
 #   created_at:    ISO8601 + TZ (for stable tie-break ordering)
@@ -115,9 +109,8 @@ def effective_at_for_file(file: File) -> datetime:
 #
 # Kind-specific:
 #   asset:        skill_name, payload, source_input_turn_id
-#   event:        event_id, end_at, location, attendees_count, files_count
+#   event:        event_id, end_at, location, attendees_count
 #   input_turn:   source (voice/typed/imported), text_snippet, derived_count
-#   file:         source_tag, file_type, asr_status
 
 
 def _iso(dt: Optional[datetime]) -> Optional[str]:
@@ -227,23 +220,6 @@ def _input_turn_item(turn: InputTurn) -> dict:
         "subtitle":     "",
         "source":       turn.source,
         "session_id":   str(turn.session_id) if turn.session_id else None,
-        "file_id":      str(turn.file_id) if turn.file_id else None,
-    }
-
-
-def _file_item(file: File) -> dict:
-    kind_label = "🎙 闪念录音" if file.source_tag == "flash" else (
-                 "📁 会议录音" if file.source_tag == "meeting" else "📎 文件")
-    return {
-        "kind":         "file",
-        "id":           str(file.id),
-        "effective_at": _iso(effective_at_for_file(file)),
-        "created_at":   _iso(file.created_at),
-        "title":        kind_label,
-        "subtitle":     f"{file.file_type or ''} · {file.duration_sec or 0}s",
-        "file_id":      str(file.id),
-        "source_tag":   file.source_tag,
-        "asr_status":   file.asr_status,
     }
 
 
@@ -254,7 +230,7 @@ async def assemble_timeline(
     user_id: str,
     from_dt: Optional[datetime] = None,
     to_dt:   Optional[datetime] = None,
-    kinds:   Optional[set] = None,        # subset of {"asset", "event", "input_turn", "file"}
+    kinds:   Optional[set] = None,        # subset of {"asset", "event", "input_turn"}
     skill_names: Optional[set] = None,    # restrict asset kind to specific skills
     limit: int = 500,
 ) -> list:
@@ -266,7 +242,7 @@ async def assemble_timeline(
     scale this is fine; for large data, push effective_at into SQL via
     GENERATED columns or CTE.
     """
-    kinds = kinds or {"asset", "event", "input_turn", "file"}
+    kinds = kinds or {"asset", "event", "input_turn"}
     items: list = []
 
     # ── assets (joined to skill name) ──
@@ -304,13 +280,6 @@ async def assemble_timeline(
         turns = (await db.execute(stmt)).scalars().all()
         for t in turns:
             items.append(_input_turn_item(t))
-
-    # ── files ──
-    if "file" in kinds:
-        stmt = select(File).where(File.user_id == user_id)
-        files = (await db.execute(stmt)).scalars().all()
-        for f in files:
-            items.append(_file_item(f))
 
     # ── window filter ──
     if from_dt or to_dt:
