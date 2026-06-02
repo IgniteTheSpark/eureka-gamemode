@@ -2,6 +2,7 @@ import "./gamemode.css";
 import { useViewSwipe } from "./useViewSwipe";
 import { Headbar } from "./Headbar";
 import { SessionView } from "./views/SessionView";
+import { TimeView } from "./views/TimeView";
 
 export function GameModeShell() {
   const { view, setView, trackRef, dragging } = useViewSwipe();
@@ -15,7 +16,9 @@ export function GameModeShell() {
         ref={trackRef}
         style={{ transform: `translateX(${-view * (100 / 3)}%)` }}
       >
-        <section className="view" data-testid="view-time" />
+        <section className="view" data-testid="view-time">
+          <TimeView />
+        </section>
         <section className="view" data-testid="view-session">
           <SessionView ctx="今日闪念 · 周二 6/2 · daily" />
         </section>

@@ -1,0 +1,221 @@
+import { useState } from "react";
+import { SAMPLE_STREAM_DAYS, buildYearGrid } from "../gamemodeData";
+
+const TABS = ["流", "月", "年"] as const;
+
+function readInitialTab(): number {
+  try {
+    const v = localStorage.getItem("eu_tsub");
+    if (v !== null) {
+      const n = parseInt(v, 10);
+      if (n >= 0 && n <= 2) return n;
+    }
+  } catch {
+    /* ignore */
+  }
+  return 1; // default: 月
+}
+
+export function TimeView() {
+  const [active, setActive] = useState<number>(readInitialTab);
+
+  function switchTab(i: number) {
+    setActive(i);
+    try {
+      localStorage.setItem("eu_tsub", String(i));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const yearMonths = buildYearGrid(5); // June = index 5
+
+  return (
+    <div className="view-scroll">
+      {/* sub-tab bar */}
+      <div className="vbar">
+        <div className="subtabs" id="timeTabs">
+          {TABS.map((label, i) => (
+            <span
+              key={label}
+              className={`subtab${active === i ? " on" : ""}`}
+              data-testid={`subtab-${label}`}
+              onClick={() => switchTab(i)}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 流 · time stream ── */}
+      <div
+        className={`tpanel${active === 0 ? " on" : ""}`}
+        data-testid="tp-stream"
+        id="tp-stream"
+      >
+        <div className="tstream">
+          {SAMPLE_STREAM_DAYS.map((day, idx) => (
+            <div key={idx} className={`ts-day${day.muted ? " muted" : ""}`}>
+              <div className="ts-date">
+                <span className="tsd-d">{day.date}</span>
+                <span className="tsd-w">{day.weekday}</span>
+                <span className="tsd-p">{day.progress}</span>
+              </div>
+              <div className="ts-cards">
+                {day.chips.map((chip, ci) => (
+                  <div key={ci} className="ts-chip">
+                    <span className={`tc-i ${chip.cls}`}>{chip.icon}</span>
+                    <span className="tc-t">{chip.title}</span>
+                    <span className="tc-tm">{chip.time}</span>
+                  </div>
+                ))}
+              </div>
+              {day.more !== undefined && (
+                <div className="ts-more">+ {day.more} 条</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 月 · month calendar ── */}
+      <div
+        className={`tpanel${active === 1 ? " on" : ""}`}
+        data-testid="tp-month"
+        id="tp-month"
+      >
+        <div className="cal">
+          <div className="cal-h">
+            <span className="cm">2026 年 6 月</span>
+            <span className="cnav">‹&nbsp;&nbsp;›</span>
+          </div>
+          <div className="cal-grid">
+            {/* weekday headers */}
+            {["一", "二", "三", "四", "五", "六", "日"].map(w => (
+              <span key={w} className="cw">{w}</span>
+            ))}
+
+            {/* day 1 — idea dot */}
+            <span className="cal-cell">1<span className="cd"><i className="bg-idea"></i></span></span>
+
+            {/* day 2 — today + selected, 2 white dots */}
+            <span className="cal-cell today sel">
+              2<span className="cd">
+                <i style={{ background: "#fff" }}></i>
+                <i style={{ background: "#fff" }}></i>
+              </span>
+            </span>
+
+            {/* day 3 — no dots */}
+            <span className="cal-cell">3<span className="cd"></span></span>
+
+            {/* day 4 — money dot */}
+            <span className="cal-cell">4<span className="cd"><i className="bg-money"></i></span></span>
+
+            {/* day 5 — note + todo dots */}
+            <span className="cal-cell">5<span className="cd"><i className="bg-note"></i><i className="bg-todo"></i></span></span>
+
+            {/* days 6-7 — plain */}
+            <span className="cal-cell">6<span className="cd"></span></span>
+            <span className="cal-cell">7<span className="cd"></span></span>
+
+            {/* days 8-14 */}
+            {[8,9,10,11,12,13,14].map(d => (
+              <span key={d} className="cal-cell">{d}</span>
+            ))}
+
+            {/* days 15-21 */}
+            {[15,16,17,18,19,20,21].map(d => (
+              <span key={d} className="cal-cell">{d}</span>
+            ))}
+
+            {/* days 22-28 */}
+            {[22,23,24,25,26,27,28].map(d => (
+              <span key={d} className="cal-cell">{d}</span>
+            ))}
+
+            {/* days 29-30, then trailing muted 1-5 */}
+            <span className="cal-cell">29</span>
+            <span className="cal-cell">30</span>
+            {[1,2,3,4,5].map(d => (
+              <span key={`m${d}`} className="cal-cell mute">{d}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* day panel */}
+        <div className="day-panel-h">
+          <span className="dp-d">今天 · 6/2 周二</span>
+          <span className="dp-p">任务 3/5</span>
+        </div>
+
+        {/* day cards */}
+        <div className="card">
+          <div className="ctype bg-todo">✓</div>
+          <div className="cb">
+            <div className="ctag fg-todo">待办</div>
+            <div className="ctitle">回复房东短信</div>
+          </div>
+          <span className="cgo">›</span>
+        </div>
+
+        <div className="card" style={{ marginTop: 11 }}>
+          <div className="ctype bg-money">¥</div>
+          <div className="cb">
+            <div className="ctag fg-money">开销</div>
+            <div className="ctitle">咖啡 ¥32</div>
+            <div className="csub">14:20 · 语音录入</div>
+          </div>
+          <span className="cgo">›</span>
+        </div>
+
+        <div className="card" style={{ marginTop: 11 }}>
+          <div className="ctype bg-idea">◆</div>
+          <div className="cb">
+            <div className="ctag fg-idea">想法</div>
+            <div className="ctitle">游戏化的留存假设</div>
+          </div>
+          <span className="cgo">›</span>
+        </div>
+      </div>
+
+      {/* ── 年 · year heatmap ── */}
+      <div
+        className={`tpanel${active === 2 ? " on" : ""}`}
+        data-testid="tp-year"
+        id="tp-year"
+      >
+        <div className="vbar" style={{ margin: "2px 0 14px" }}>
+          <span className="vb-ctx">2026 · 全年活跃</span>
+        </div>
+
+        <div className="year-grid" data-testid="yearGrid" id="yearGrid">
+          {yearMonths.map((mon, mi) => (
+            <div
+              key={mi}
+              className={`ymon${mon.current ? " cur" : ""}`}
+              onClick={() => switchTab(1)}
+            >
+              <div className="ym-t">{mon.label}</div>
+              <div className="ym-cells">
+                {mon.cells.map((cls, ci) => (
+                  <i key={ci} className={cls}></i>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="year-legend">
+          <span>少</span>
+          <i style={{ background: "var(--surface-3)" }}></i>
+          <i className="bg-idea" style={{ opacity: 0.3 }}></i>
+          <i style={{ background: "var(--brand-line)" }}></i>
+          <i style={{ background: "var(--brand)" }}></i>
+          <span>多</span>
+        </div>
+      </div>
+    </div>
+  );
+}
