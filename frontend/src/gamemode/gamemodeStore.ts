@@ -12,7 +12,12 @@
  *   - session-context: pastMode, sessionCtx, backToToday(), viewPastDaily()
  *   - thread: { open, name, sub } + openThread() + closeThread()
  *
- * Extensibility contract (T11 will append):
+ * T11 additions:
+ *   - cardDetail: { open, card } + openCardDetail(card) + closeCardDetail()
+ *   - picker: { open } + openPicker() + closePicker()
+ *   - ctxChips: { cls, icon, title }[] + seedCtx(card) + addCtxChips(cards) + removeCtxChip(index)
+ *
+ * Extensibility contract:
  *   - Add a new useState per slice inside GameModeProvider.
  *   - Spread the new slice + actions into the ctx value object.
  *   - Widen GameModeCtx with the new fields.
@@ -41,6 +46,30 @@ export interface ThreadState {
   open: boolean;
   name: string;
   sub: string;
+}
+
+// T11: card detail slice
+export interface CardDetailCard {
+  cls: string;
+  icon: string;
+  title: string;
+}
+
+export interface CardDetailState {
+  open: boolean;
+  card: CardDetailCard | null;
+}
+
+// T11: picker slice
+export interface PickerState {
+  open: boolean;
+}
+
+// T11: context chip
+export interface CtxChip {
+  cls: string;
+  icon: string;
+  title: string;
 }
 
 const DEFAULT_SESSION_CTX = "今日闪念 · 周二 6/2 · daily";
@@ -74,7 +103,21 @@ export interface GameModeCtx {
   openThread: (name: string, sub: string) => void;
   closeThread: () => void;
 
-  // T11 will add: cardDetail, picker, openCardDetail, openPicker, closePicker
+  // T11: card detail slice
+  cardDetail: CardDetailState;
+  openCardDetail: (card: CardDetailCard) => void;
+  closeCardDetail: () => void;
+
+  // T11: asset picker slice
+  picker: PickerState;
+  openPicker: () => void;
+  closePicker: () => void;
+
+  // T11: context chips
+  ctxChips: CtxChip[];
+  seedCtx: (card: CardDetailCard) => void;
+  addCtxChips: (cards: CardDetailCard[]) => void;
+  removeCtxChip: (index: number) => void;
 }
 
 // ── Internal context ─────────────────────────────────────────────────────────
@@ -138,6 +181,34 @@ export const GameModeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const closeThread = () => setThread((prev) => ({ ...prev, open: false }));
 
+  // Slice: cardDetail (T11)
+  const [cardDetail, setCardDetail] = useState<CardDetailState>({
+    open: false,
+    card: null,
+  });
+
+  const openCardDetail = (card: CardDetailCard) =>
+    setCardDetail({ open: true, card });
+
+  const closeCardDetail = () =>
+    setCardDetail((prev) => ({ ...prev, open: false }));
+
+  // Slice: picker (T11)
+  const [picker, setPicker] = useState<PickerState>({ open: false });
+  const openPicker = () => setPicker({ open: true });
+  const closePicker = () => setPicker({ open: false });
+
+  // Slice: ctxChips (T11)
+  const [ctxChips, setCtxChips] = useState<CtxChip[]>([]);
+
+  const seedCtx = (card: CardDetailCard) => setCtxChips([card]);
+
+  const addCtxChips = (cards: CardDetailCard[]) =>
+    setCtxChips((prev) => [...prev, ...cards]);
+
+  const removeCtxChip = (index: number) =>
+    setCtxChips((prev) => prev.filter((_, i) => i !== index));
+
   const value: GameModeCtx = {
     collection,
     openCollection,
@@ -155,6 +226,16 @@ export const GameModeProvider: React.FC<{ children: React.ReactNode }> = ({
     thread,
     openThread,
     closeThread,
+    cardDetail,
+    openCardDetail,
+    closeCardDetail,
+    picker,
+    openPicker,
+    closePicker,
+    ctxChips,
+    seedCtx,
+    addCtxChips,
+    removeCtxChip,
   };
 
   return React.createElement(GameModeContext.Provider, { value }, children);
