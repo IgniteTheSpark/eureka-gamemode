@@ -117,17 +117,7 @@ export function Pet() {
     if (!petEl) return;
     const petRect = petEl.getBoundingClientRect();
 
-    const gmRoot = findGmRoot(petEl);
-    const gmRect = gmRoot?.getBoundingClientRect();
-    const gmOffX = gmRect?.left ?? 0;
-    const gmOffY = gmRect?.top ?? 0;
-
-    // Offset within the pet (in gm-relative coordinates)
-    offset.current = {
-      x: touch.clientX - petRect.left - gmOffX + (gmRect?.left ?? 0) - gmOffX,
-      y: touch.clientY - petRect.top - gmOffY + (gmRect?.top ?? 0) - gmOffY,
-    };
-    // Simpler: offset from pet corner in client coords
+    // Offset of pointer within the pet element (client coords)
     offset.current = {
       x: touch.clientX - petRect.left,
       y: touch.clientY - petRect.top,
