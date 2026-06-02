@@ -1,4 +1,17 @@
-import { useState } from "react";
+/**
+ * SessionView — session stream view (center panel).
+ *
+ * L0b wiring:
+ *   - Resolves today's flash session via useSessions({sessionType:"flash"}).
+ *   - Loads messages via useSessionMessages(id) for the chat bubbles + inline
+ *     asset cards (via buildCard from render_spec).
+ *   - In past mode the store already sets sessionCtx but we still render from
+ *     the real session if we can resolve the session id from the past daily
+ *     label — TODO(L0b): past-mode session id resolution deferred; falls back
+ *     to SAMPLE_MESSAGES for now.
+ *   - Tasks block stays STATIC (L1 deferred).
+ */
+import { useState, useMemo } from "react";
 import {
   SAMPLE_TASKS,
   SAMPLE_MESSAGES,
@@ -6,6 +19,40 @@ import {
 } from "../gamemodeData";
 import type { GMTask } from "../gamemodeData";
 import { useGameMode } from "../gamemodeStore";
+import { useSessions, useSessionMessages } from "@/hooks/useSessions";
+import { useSkillRegistry } from "@/hooks/useSkillRegistry";
+import { buildCard } from "@/lib/render-spec";
+import type { Message } from "@/lib/types";
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+/** Today's local date as "YYYY-MM-DD". */
+function todayStr(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+// Map accent_color → gamemode CSS bg-* / fg-* classes
+const ACCENT_BG: Record<string, string> = {
+  blue:    "bg-todo",
+  amber:   "bg-money",
+  green:   "bg-move",
+  red:     "bg-move",
+  purple:  "bg-idea",
+  gray:    "bg-note",
+  neutral: "bg-note",
+};
+const ACCENT_FG: Record<string, string> = {
+  blue:    "fg-todo",
+  amber:   "fg-money",
+  green:   "fg-move",
+  red:     "fg-move",
+  purple:  "fg-idea",
+  gray:    "fg-note",
+  neutral: "fg-note",
+};
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function SessionView() {
   const { sessionCtx, pastMode, openDrawer, backToToday } = useGameMode();
@@ -17,6 +64,54 @@ export function SessionView() {
   function toggleTask(idx: number) {
     setTasks(prev => prev.map((t, i) => i === idx ? { ...t, done: !t.done } : t));
   }
+
+  // Resolve today's flash session id
+  const today = useMemo(() => todayStr(), []);
+  const { sessions: flashSessions } = useSessions({ sessionType: "flash" });
+  const todaySession = flashSessions.find((s) => s.date === today) ?? null;
+  const sessionId = pastMode ? null : (todaySession?.id ?? null);
+
+  // Load messages for the active session
+  const { messages: rawMessages } = useSessionMessages(sessionId);
+  const { bySkill } = useSkillRegistry();
+
+  // Build rendered message items from real messages, or fall back to sample
+  const messages = useMemo(() => {
+    if (rawMessages.length === 0) return SAMPLE_MESSAGES;
+
+    return rawMessages
+      .filter((m: Message) => m.role === "user" || m.role === "agent")
+      .map((m: Message) => {
+        const role = m.role === "user" ? "me" as const : "ag" as const;
+        // Try to extract card from first card in the message
+        const firstCard = m.cards?.[0] as Record<string, unknown> | undefined;
+        let card: typeof SAMPLE_MESSAGES[0]["card"] | undefined;
+
+        if (firstCard) {
+          const skillName = (firstCard.user_skill_name ?? firstCard.skill_name) as string | undefined;
+          const payload   = (firstCard.payload ?? firstCard) as Record<string, unknown>;
+          const skill     = skillName ? bySkill.get(skillName) : undefined;
+          const cd = buildCard({
+            payload,
+            spec:        skill?.render_spec ?? null,
+            assetId:     (firstCard.id ?? firstCard.asset_id) as string | null,
+            cardType:    skillName ?? "asset",
+            displayName: skill?.display_name ?? "资产",
+          });
+          const accent = skill?.render_spec?.accent_color ?? "gray";
+          card = {
+            cls:      ACCENT_BG[accent] ?? "bg-note",
+            icon:     cd.icon,
+            tag:      `${skill?.display_name ?? skillName ?? "资产"}`,
+            tagClass: ACCENT_FG[accent] ?? "fg-note",
+            title:    cd.title,
+            sub:      cd.subtitle || undefined,
+          };
+        }
+
+        return { role, text: m.text, card };
+      });
+  }, [rawMessages, bySkill]);
 
   return (
     <div className="view-scroll">
@@ -48,7 +143,7 @@ export function SessionView() {
         </div>
       </div>
 
-      {/* tasks */}
+      {/* tasks — STATIC (L1 deferred) */}
       <div className={`tasks${open ? " open" : ""}`} id="sessionTasks">
         <div className="tasks-head" onClick={() => setOpen(o => !o)}>
           <span className="th-t">今日任务</span>
@@ -105,8 +200,8 @@ export function SessionView() {
       {/* day divider */}
       <div className="daydiv">今天 · 6 月 2 日</div>
 
-      {/* chat stream */}
-      {SAMPLE_MESSAGES.map((msg, idx) => (
+      {/* chat stream — from real messages, or sample fallback */}
+      {messages.map((msg, idx) => (
         <div key={idx} className="msg">
           <div className={`bubble ${msg.role}`}>{msg.text}</div>
           {msg.card && (
@@ -120,8 +215,8 @@ export function SessionView() {
               <span className="cgo">›</span>
             </div>
           )}
-          {msg.expPop && (
-            <div className="exp-pop">{msg.expPop}</div>
+          {("expPop" in msg) && msg.expPop && (
+            <div className="exp-pop">{(msg as { expPop: string }).expPop}</div>
           )}
         </div>
       ))}
