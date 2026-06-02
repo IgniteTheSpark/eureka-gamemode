@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Eureka · Game Mode</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Press+Start+2P&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="scaler">
+    <div class="device">
+      <div class="notch"></div>
+
+      <div class="screen">
+        <!-- ════ TOP HEADBAR (global nav) ════ -->
+        <div class="headbar">
+          <div class="hb-left">
+            <div class="hb-avatar" id="acctBtn">K</div>
+          </div>
+          <div class="switcher" id="switcher">
+            <span class="seg">时间</span>
+            <span class="seg on">闪念</span>
+            <span class="seg">资产</span>
+          </div>
+          <div class="hb-right">
+            <div class="hb-ico" id="themeBtn" title="日夜间"></div>
+            <div class="hb-ico" id="notifBtn" title="通知"><span class="ndot"></span></div>
+          </div>
+        </div>
+
+        <!-- ════ 3 SWIPE VIEWS ════ -->
+        <div class="track" id="track">
+
+          <!-- ─── VIEW 0 · 时间 ─── -->
+          <section class="view">
+            <div class="view-scroll">
+              <div class="vbar" data-comment-anchor="2737b51067-div">
+                <div class="subtabs" id="timeTabs">
+                  <span class="subtab">流</span>
+                  <span class="subtab on">月</span>
+                  <span class="subtab">年</span>
+                </div>
+              </div>
+
+              <!-- 流 · time stream -->
+              <div class="tpanel" id="tp-stream">
+                <div class="tstream">
+                  <div class="ts-day">
+                    <div class="ts-date"><span class="tsd-d">今天 6/2</span><span class="tsd-w">周二</span><span class="tsd-p">任务 3/5</span></div>
+                    <div class="ts-cards">
+                      <div class="ts-chip"><span class="tc-i bg-money">¥</span><span class="tc-t">咖啡 ¥32</span><span class="tc-tm">14:20</span></div>
+                      <div class="ts-chip"><span class="tc-i bg-idea">◆</span><span class="tc-t">游戏化的留存假设</span><span class="tc-tm">14:22</span></div>
+                      <div class="ts-chip"><span class="tc-i bg-move">♺</span><span class="tc-t">晨跑 3km</span><span class="tc-tm">07:30</span></div>
+                    </div>
+                  </div>
+                  <div class="ts-day">
+                    <div class="ts-date"><span class="tsd-d">6/1</span><span class="tsd-w">周一</span><span class="tsd-p">任务 4/4</span></div>
+                    <div class="ts-cards">
+                      <div class="ts-chip"><span class="tc-i bg-idea">◆</span><span class="tc-t">把记录变成投喂</span><span class="tc-tm">21:05</span></div>
+                      <div class="ts-chip"><span class="tc-i bg-note">✎</span><span class="tc-t">读书笔记 · 心流</span><span class="tc-tm">19:40</span></div>
+                    </div>
+                    <div class="ts-more">+ 2 条</div>
+                  </div>
+                  <div class="ts-day muted">
+                    <div class="ts-date"><span class="tsd-d">5/30</span><span class="tsd-w">周五</span><span class="tsd-p">任务 2/3</span></div>
+                    <div class="ts-cards">
+                      <div class="ts-chip"><span class="tc-i bg-move">♺</span><span class="tc-t">交房租</span><span class="tc-tm">10:00</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 月 · month calendar -->
+              <div class="tpanel on" id="tp-month">
+                <div class="cal">
+                  <div class="cal-h"><span class="cm">2026 年 6 月</span><span class="cnav">‹&nbsp;&nbsp;›</span></div>
+                  <div class="cal-grid">
+                    <span class="cw">一</span><span class="cw">二</span><span class="cw">三</span><span class="cw">四</span><span class="cw">五</span><span class="cw">六</span><span class="cw">日</span>
+                    <span class="cal-cell">1<span class="cd"><i class="bg-idea"></i></span></span>
+                    <span class="cal-cell today sel">2<span class="cd"><i style="background:#fff"></i><i style="background:#fff"></i></span></span>
+                    <span class="cal-cell">3<span class="cd"></span></span>
+                    <span class="cal-cell">4<span class="cd"><i class="bg-money"></i></span></span>
+                    <span class="cal-cell">5<span class="cd"><i class="bg-note"></i><i class="bg-todo"></i></span></span>
+                    <span class="cal-cell">6<span class="cd"></span></span>
+                    <span class="cal-cell">7<span class="cd"></span></span>
+                    <span class="cal-cell">8</span><span class="cal-cell">9</span><span class="cal-cell">10</span><span class="cal-cell">11</span><span class="cal-cell">12</span><span class="cal-cell">13</span><span class="cal-cell">14</span>
+                    <span class="cal-cell">15</span><span class="cal-cell">16</span><span class="cal-cell">17</span><span class="cal-cell">18</span><span class="cal-cell">19</span><span class="cal-cell">20</span><span class="cal-cell">21</span>
+                    <span class="cal-cell">22</span><span class="cal-cell">23</span><span class="cal-cell">24</span><span class="cal-cell">25</span><span class="cal-cell">26</span><span class="cal-cell">27</span><span class="cal-cell">28</span>
+                    <span class="cal-cell">29</span><span class="cal-cell">30</span><span class="cal-cell mute">1</span><span class="cal-cell mute">2</span><span class="cal-cell mute">3</span><span class="cal-cell mute">4</span><span class="cal-cell mute">5</span>
+                  </div>
+                </div>
+                <div class="day-panel-h"><span class="dp-d">今天 · 6/2 周二</span><span class="dp-p">任务 3/5</span></div>
+                <div class="card"><div class="ctype bg-todo">✓</div><div class="cb"><div class="ctag fg-todo">待办</div><div class="ctitle">回复房东短信</div></div><span class="cgo">›</span></div>
+                <div class="card" style="margin-top:11px"><div class="ctype bg-money">¥</div><div class="cb"><div class="ctag fg-money">开销</div><div class="ctitle">咖啡 ¥32</div><div class="csub">14:20 · 语音录入</div></div><span class="cgo">›</span></div>
+                <div class="card" style="margin-top:11px"><div class="ctype bg-idea">◆</div><div class="cb"><div class="ctag fg-idea">想法</div><div class="ctitle">游戏化的留存假设</div></div><span class="cgo">›</span></div>
+              </div>
+
+              <!-- 年 · year heatmap -->
+              <div class="tpanel" id="tp-year">
+                <div class="vbar" style="margin:2px 0 14px;"><span class="vb-ctx">2026 · 全年活跃</span></div>
+                <div class="year-grid" id="yearGrid"></div>
+                <div class="year-legend"><span>少</span><i style="background:var(--surface-3)"></i><i class="bg-idea" style="opacity:.3"></i><i style="background:var(--brand-line)"></i><i style="background:var(--brand)"></i><span>多</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── VIEW 1 · Session (今日闪念) ─── -->
+          <section class="view">
+            <div class="view-scroll" data-comment-anchor="eb8a58b14b-div">
+              <div class="vbar" id="sessionVbar">
+                <span class="vb-ctx" id="sessionCtx">今日闪念 · 周二 6/2 · daily</span>
+                <div class="vb-actions">
+                  <span class="today-pill" id="backToday">↩ 回到今天</span>
+                  <div class="iconbtn" data-drawer><i></i><i class="short"></i><i></i></div>
+                </div>
+              </div>
+
+              <div class="tasks open" id="sessionTasks">
+                <div class="tasks-head">
+                  <span class="th-t">今日任务</span>
+                  <span class="th-prog"><i id="taskBar" style="width:60%"></i></span>
+                  <span class="th-frac" id="taskFrac">3/5</span>
+                  <span class="th-chev">›</span>
+                </div>
+                <div class="tasks-body">
+                  <div class="task done"><span class="cbox on"></span><span class="t-label">买牛奶</span><span class="tag tg-todo">待办</span><span class="t-exp">+5</span></div>
+                  <div class="task done"><span class="cbox on"></span><span class="t-label">晨跑 3km</span><span class="tag tg-move">运动</span><span class="t-exp">+6</span></div>
+                  <div class="task"><span class="cbox"></span><span class="t-label">3pm 牙医复诊</span><span class="tag tg-todo">日程</span><span class="t-exp">+5</span></div>
+                  <div class="task"><span class="cbox"></span><span class="t-label">本周读书笔记 ×3</span><span class="tag" style="background:rgba(154,165,177,.14);color:var(--text-mid)">技能</span><span class="t-exp">+10</span></div>
+                  <div class="task done"><span class="cbox" style="visibility:hidden"></span>
+                    <div class="meal-slots">
+                      <div class="mslot on"><div class="mn">早</div><div class="mt">08:12</div></div>
+                      <div class="mslot on"><div class="mn">午</div><div class="mt">12:40</div></div>
+                      <div class="mslot on"><div class="mn">晚</div><div class="mt">19:30</div></div>
+                    </div>
+                    <span class="t-exp">+8</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="daydiv">今天 · 6 月 2 日</div>
+
+              <div class="msg"><div class="bubble me">刚买了杯手冲，32 块</div></div>
+              <div class="msg">
+                <div class="bubble ag">记好啦 ☕ 已记入今天的开销。</div>
+                <div class="card"><div class="ctype bg-money">¥</div><div class="cb"><div class="ctag fg-money">开销 · 餐饮</div><div class="ctitle">咖啡 ¥32</div><div class="csub">6/2 14:20</div></div><span class="cgo">›</span></div>
+                <div class="exp-pop">＋5 EXP · 已喂球球</div>
+              </div>
+              <div class="msg"><div class="bubble me">突然想到，游戏化也许能让记录更上瘾</div></div>
+              <div class="msg">
+                <div class="bubble ag">有意思，我帮你存成一条想法 💡 之后可以一起深挖。</div>
+                <div class="card"><div class="ctype bg-idea">◆</div><div class="cb"><div class="ctag fg-idea">想法</div><div class="ctitle">游戏化的留存假设</div></div><span class="cgo">›</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ─── VIEW 2 · 资产 ─── -->
+          <section class="view">
+            <div class="view-scroll">
+              <div class="vbar"><span class="vb-ctx">按类型 · 图鉴</span></div>
+              <div class="cat-grid">
+                <div class="cat" data-cat="待办" data-count="23"><div class="ci bg-todo">✓</div><div><div class="cn">待办</div><div class="cc">23 条</div></div></div>
+                <div class="cat" data-cat="想法" data-count="41"><div class="ci bg-idea">◆</div><div><div class="cn">想法</div><div class="cc">41 条</div></div></div>
+                <div class="cat" data-cat="开销" data-count="12"><div class="ci bg-money">¥</div><div><div class="cn">开销</div><div class="cc">12 条</div></div></div>
+                <div class="cat" data-cat="笔记" data-count="30"><div class="ci bg-note">✎</div><div><div class="cn">笔记</div><div class="cc">30 条</div></div></div>
+                <div class="cat" data-cat="运动" data-count="8"><div class="ci bg-move">♺</div><div><div class="cn">运动</div><div class="cc">8 条</div></div></div>
+                <div class="cat" data-cat="联系人" data-count="16"><div class="ci bg-people">☺</div><div><div class="cn">联系人</div><div class="cc">16 条</div></div></div>
+                <div class="cat add"><span class="plus">＋</span>&nbsp;新类型</div>
+              </div>
+            </div>
+          </section>
+
+        </div><!-- /track -->
+
+        <!-- chat bar (Session only) -->
+        <div class="chatbar" id="chatbar">
+          <div class="ci-input">随时说点什么…</div>
+          <div class="ci-mic"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" fill="#fff"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+        </div>
+
+        <!-- 球球 desktop pet (spans all views) -->
+        <div id="pet" class="bobbing"><span data-mascot></span><span class="shadow"></span></div>
+
+        <!-- pet short-press menu -->
+        <div class="pet-menu" id="petMenu">
+          <div class="pm-row"><span class="pm-ico bg-note">∑</span><div><div class="pm-lab">总结今日</div><div class="pm-sub">ONE-TIME · agent</div></div></div>
+          <div class="pm-row" data-act="newchat"><span class="pm-ico bg-idea">✎</span><div><div class="pm-lab">新建对话</div><div class="pm-sub">开一个线程</div></div></div>
+          <div class="pm-row"><span class="pm-ico bg-money">＋</span><div><div class="pm-lab">生成新任务</div><div class="pm-sub">从近期资产抽象</div></div></div>
+          <div class="pm-row" data-act="detail"><span class="pm-ico" style="background:var(--brand)">★</span><div><div class="pm-lab">查看详情</div><div class="pm-sub">成长档案</div></div></div>
+        </div>
+
+        <!-- long-press listening -->
+        <div class="listen" id="listen">
+          <span data-mascot style="width:48px;height:48px;display:block"></span>
+          <div class="wave"><i style="animation-delay:0s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.05s"></i><i style="animation-delay:.25s"></i><i style="animation-delay:.12s"></i></div>
+          <div class="lt">听着呢… 松开结束</div>
+        </div>
+
+        <!-- session sidebar drawer -->
+        <div class="scrim" id="scrim"></div>
+        <aside class="drawer" id="drawer">
+          <div class="dw-head"><span class="dw-t">SESSION</span><span class="dw-x" id="drawerX">✕</span></div>
+          <div class="new-sess" data-drawer-new><span class="np">＋</span><span class="nt">新建 session</span></div>
+          <div class="dw-scroll">
+            <div class="dgroup">今日</div>
+            <div class="srow active"><span class="si bg-todo">✎</span><div class="sm"><div class="st">今日闪念 · 6/2</div><div class="ss">daily · 6 条</div></div><span class="stime">现在</span></div>
+            <div class="dgroup">历史 · 按日</div>
+            <div class="srow"><span class="si bg-todo">✎</span><div class="sm"><div class="st">6/1 闪念</div><div class="ss">daily · 4 条</div></div><span class="stime">昨天</span></div>
+            <div class="srow"><span class="si bg-todo">✎</span><div class="sm"><div class="st">5/30 闪念</div><div class="ss">daily · 5 条</div></div><span class="stime">5/30</span></div>
+            <div class="dgroup">话题线程</div>
+            <div class="srow"><span class="si bg-money">¥</span><div class="sm"><div class="st">咖啡 ¥32 — 外食花多少</div><div class="ss">锚定 · 开销卡</div></div><span class="stime">2h</span></div>
+            <div class="srow"><span class="si bg-idea">✎</span><div class="sm"><div class="st">帮我想个周末计划</div><div class="ss">自由 · 4 轮</div></div><span class="stime">昨天</span></div>
+            <div class="srow"><span class="si bg-people">☺</span><div class="sm"><div class="st">和 Kevin 相关</div><div class="ss">锚定 · 联系人</div></div><span class="stime">5/28</span></div>
+          </div>
+        </aside>
+
+        <!-- collection overlay -->
+        <div class="overlay" id="collection">
+          <div class="ov-head">
+            <span class="back" id="collBack">‹</span>
+            <span class="ov-t" id="collTitle">想法</span>
+            <span class="ov-s" id="collSub">41 条</span>
+          </div>
+          <div class="ov-body">
+            <div class="coll-grid">
+              <div class="coll-card"><div class="cc-h"><span class="cc-dot bg-idea">◆</span><span class="cc-date">6/2</span></div><div class="cc-text">游戏化的留存假设</div></div>
+              <div class="coll-card"><div class="cc-h"><span class="cc-dot bg-idea">◆</span><span class="cc-date">6/1</span></div><div class="cc-text">把记录变成投喂</div></div>
+              <div class="coll-card"><div class="cc-h"><span class="cc-dot bg-idea">◆</span><span class="cc-date">5/30</span></div><div class="cc-text">球球的进化阶段</div></div>
+              <div class="coll-card"><div class="cc-h"><span class="cc-dot bg-idea">◆</span><span class="cc-date">5/28</span></div><div class="cc-text">侧边栏即会话列表</div></div>
+              <div class="coll-card"><div class="cc-h"><span class="cc-dot bg-idea">◆</span><span class="cc-date">5/27</span></div><div class="cc-text">三视图 swipe 导航</div></div>
+              <div class="coll-card"><div class="cc-h"><span class="cc-dot bg-idea">◆</span><span class="cc-date">5/26</span></div><div class="cc-text">闪念≈chat，同源</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- pet detail overlay -->
+        <div class="detail" id="detail">
+          <span class="dt-close" id="detailClose">✕</span>
+          <div class="dt-scroll">
+            <div class="dt-hero">
+              <span data-mascot class="big-mascot"></span>
+              <span class="ped"></span>
+              <span class="lvname">LV.4 · 球球</span>
+              <div class="dt-exp">
+                <div class="bar"><i style="width:64%"></i></div>
+                <div class="nums"><span>EXP 320 / 500</span><span>距 LV.5 · 180</span></div>
+              </div>
+            </div>
+            <div class="evo">
+              <div class="evo-node"><span class="evo-dot on"></span><span class="evo-cap on">幼体</span></div>
+              <span class="evo-line"></span>
+              <div class="evo-node"><span class="evo-dot on cur"></span><span class="evo-cap on">成长</span></div>
+              <span class="evo-line"></span>
+              <div class="evo-node"><span class="evo-dot"></span><span class="evo-cap">完全体</span></div>
+            </div>
+            <div class="sect-t">成长统计</div>
+            <div class="stat-grid">
+              <div class="stat"><div class="sv">48</div><div class="sl">完成待办</div></div>
+              <div class="stat"><div class="sv">12</div><div class="sl">三餐记满天</div></div>
+              <div class="stat"><div class="sv">5</div><div class="sl">想法升华</div></div>
+              <div class="stat"><div class="sv">23</div><div class="sl">陪伴天数</div></div>
+            </div>
+            <div class="sect-t">解锁历史</div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:4px 14px">
+              <div class="unlock"><span class="ulv">LV.2</span><span class="ut">新表情 · 待机小动作</span></div>
+              <div class="unlock"><span class="ulv">LV.3</span><span class="ut">装扮:帽子 / 配色皮肤</span></div>
+              <div class="unlock"><span class="ulv">LV.4</span><span class="ut">更聪明的整理建议</span></div>
+              <div class="unlock"><span class="ulv lock">LV.5</span><span class="ut lock">完全体形态(还差 180 EXP)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- card detail overlay -->
+        <div class="overlay" id="cardDetail" style="z-index:74">
+          <div class="ov-head">
+            <span class="back" id="cdBack">‹</span>
+            <span class="ov-t">资产详情</span>
+          </div>
+          <div class="ov-body">
+            <div class="cd-hero">
+              <span class="cd-ico bg-money" id="cdIco">¥</span>
+              <div><div class="cd-tt" id="cdTitle">咖啡 ¥32</div><div class="cd-ss" id="cdSub">expense · 6/2 14:20</div></div>
+            </div>
+            <div class="src-btn" id="cdSource">
+              <span class="sb-i">⚡</span><span class="sb-t">查看来源 · 今日闪念 6/2</span><span class="sb-go">›</span>
+            </div>
+            <div class="cd-fields" id="cdFields">
+              <div class="cd-field"><div class="fl">金额 amount</div><div class="fv amt">¥32.00</div></div>
+              <div class="cd-field"><div class="fl">商家 merchant</div><div class="fv">Blue Bottle</div></div>
+              <div class="cd-field"><div class="fl">类别 category</div><div class="fv">餐饮</div></div>
+              <div class="cd-field"><div class="fl">备注 description</div><div class="fv">下午手冲，续命一杯</div></div>
+            </div>
+            <div class="cd-actions">
+              <div class="cd-btn"><svg class="cb-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="cb-t">编辑</span></div>
+              <div class="cd-btn"><svg class="cb-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="cb-t">删除</span></div>
+              <div class="cd-btn primary" id="cdChat"><svg class="cb-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-12 7.5L3 21l2-6a8.4 8.4 0 1 1 16-3.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="cb-t">对话</span></div>
+            </div>
+            <p style="font-family:var(--mono);font-size:11px;color:var(--text-lo);text-align:center;margin-top:16px;line-height:1.6">「对话」= 以这张卡为 context 开启一个 session</p>
+          </div>
+        </div>
+
+        <!-- thread (context session) overlay -->
+        <div class="thread" id="thread">
+          <div class="th-head">
+            <span class="back" id="thBack">‹</span>
+            <div class="th-tt"><div class="tn" id="thName">咖啡 ¥32 · 追问</div><div class="ts" id="thSub">chat · 以资产为 context</div></div>
+            <div class="iconbtn" data-drawer><i></i><i class="short"></i><i></i></div>
+          </div>
+          <div class="th-body">
+            <div class="ctx">
+              <div class="ctx-h"><span class="ch-t">CONTEXT · 关联资产</span><span class="ch-n" id="ctxCount">3 项</span></div>
+              <div class="ctx-chips" id="ctxChips">
+                <span class="ctx-chip"><span class="cc-i bg-money">¥</span><span class="cc-t">咖啡 ¥32</span><span class="cc-x">✕</span></span>
+                <span class="ctx-chip"><span class="cc-i bg-idea">◆</span><span class="cc-t">副业想法</span><span class="cc-x">✕</span></span>
+                <span class="ctx-chip"><span class="cc-i bg-people">☺</span><span class="cc-t">Kevin</span><span class="cc-x">✕</span></span>
+                <span class="ctx-chip add" id="ctxAdd">＋ 添加资产</span>
+              </div>
+            </div>
+            <div class="msg"><div class="bubble me">这个月外食总共花了多少？</div></div>
+            <div class="msg">
+              <div class="bubble ag">把已记的餐饮类开销汇总了一下 👇 本月外食 ¥486，其中咖啡占 ¥128。</div>
+              <div class="card" data-asset="note"><div class="ctype bg-note">⊞</div><div class="cb"><div class="ctag fg-note">衍生 · 月度外食汇总</div><div class="ctitle">6 月餐饮 ¥486</div></div><span class="cgo">›</span></div>
+            </div>
+            <div class="msg"><div class="bubble me">帮我设个每月外食预算提醒</div></div>
+            <div class="msg"><div class="bubble ag">好，已记成一条待办，月底前提醒你回顾 ✅</div></div>
+          </div>
+          <div class="chatbar" style="position:static;background:none;padding-top:6px">
+            <div class="ci-input">基于这些 context 接着问…</div>
+            <div class="ci-mic"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" fill="#fff"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></div>
+          </div>
+        </div>
+
+        <!-- asset picker sheet (add context) -->
+        <div class="picker-scrim" id="pickerScrim"></div>
+        <div class="picker" id="picker">
+          <div class="pk-grab"></div>
+          <div class="pk-head"><span class="pk-t">添加 CONTEXT 资产</span><span class="pk-x" id="pickerX">✕</span></div>
+          <div class="pk-scroll">
+            <div class="pk-row"><span class="pk-i bg-idea">◆</span><div class="pk-mid"><div class="pk-mt">游戏化的留存假设</div><div class="pk-ms">想法 · 6/2</div></div><span class="pk-ck"></span></div>
+            <div class="pk-row"><span class="pk-i bg-note">✎</span><div class="pk-mid"><div class="pk-mt">读书笔记 · 心流</div><div class="pk-ms">笔记 · 6/1</div></div><span class="pk-ck"></span></div>
+            <div class="pk-row"><span class="pk-i bg-todo">✓</span><div class="pk-mid"><div class="pk-mt">本周读书笔记 ×3</div><div class="pk-ms">待办 · 6/2</div></div><span class="pk-ck"></span></div>
+            <div class="pk-row"><span class="pk-i bg-money">¥</span><div class="pk-mid"><div class="pk-mt">交房租 ¥3200</div><div class="pk-ms">开销 · 5/30</div></div><span class="pk-ck"></span></div>
+            <div class="pk-row"><span class="pk-i bg-people">☺</span><div class="pk-mid"><div class="pk-mt">房东 · 王先生</div><div class="pk-ms">联系人</div></div><span class="pk-ck"></span></div>
+          </div>
+          <div class="pk-done" id="pickerDone">添加所选</div>
+        </div>
+
+      </div><!-- /screen -->
+
+      <!-- status bar over everything -->
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="sb-right">
+          <span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:11px"></i></span>
+          <span class="batt"></span>
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div><!-- /device -->
+  </div><!-- /scaler -->
+
+  <div id="tweaks-root"></div>
+
+  <script src="app.js"></script>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "brand": "#a07ce0",
+      "bob": true
+    }/*EDITMODE-END*/;
+    function App() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      React.useEffect(() => {
+        document.documentElement.style.setProperty("--brand", t.brand);
+        const hi = { "#5b8def":"#7aa2f7", "#46b3aa":"#6fd0c9", "#a07ce0":"#bb9af7", "#7fb950":"#9ece6a" }[t.brand] || "#7aa2f7";
+        document.documentElement.style.setProperty("--brand-hi", hi);
+        document.documentElement.style.setProperty("--brand-line", t.brand + "55");
+        document.documentElement.style.setProperty("--brand-faint", t.brand + "1f");
+        const pet = document.getElementById("pet");
+        if (pet) pet.classList.toggle("bobbing", t.bob);
+      }, [t]);
+      return (
+        <TweaksPanel>
+          <TweakSection label="球球 / 强调色" />
+          <TweakColor label="主色调" value={t.brand}
+            options={["#5b8def", "#46b3aa", "#a07ce0", "#7fb950"]}
+            onChange={(v) => setTweak("brand", v)} />
+          <TweakToggle label="球球待机蹦跳" value={t.bob} onChange={(v) => setTweak("bob", v)} />
+        </TweaksPanel>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("tweaks-root")).render(<App />);
+  </script>
+</body>
+</html>
