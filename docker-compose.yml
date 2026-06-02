@@ -18,7 +18,9 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      # Host port configurable (default 8000) so multiple Eureka stacks can
+      # coexist on one machine. Set BACKEND_PORT in .env to override.
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
       DATABASE_URL: postgresql://eureka:eureka@db:5432/eureka
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}

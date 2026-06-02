@@ -12,13 +12,16 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    // Dev port + proxy target are env-overridable so multiple Eureka stacks
+    // can run side by side, e.g.:
+    //   VITE_DEV_PORT=5174 VITE_PROXY_TARGET=http://localhost:8001 npm run dev
+    port: Number(process.env.VITE_DEV_PORT) || 5173,
     proxy: {
-      // /api/* → backend (FastAPI on :8000). Keeps same-origin in dev so SSE +
+      // /api/* → backend (FastAPI). Keeps same-origin in dev so SSE +
       // cookies behave like prod. Production deploy can fold both behind the
       // same domain or use VITE_API_BASE override.
       "/api": {
-        target: "http://localhost:8000",
+        target: process.env.VITE_PROXY_TARGET || "http://localhost:8000",
         changeOrigin: true,
         ws: false,
       },
