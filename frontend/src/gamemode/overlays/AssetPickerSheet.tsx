@@ -39,7 +39,8 @@ export function AssetPickerSheet() {
     closePicker();
   }
 
-  function handleScrimClick() {
+  function dismiss() {
+    setSelected(new Set());
     closePicker();
   }
 
@@ -48,7 +49,7 @@ export function AssetPickerSheet() {
       <div
         className={`picker-scrim${picker.open ? " show" : ""}`}
         data-testid="pickerScrim"
-        onClick={handleScrimClick}
+        onClick={dismiss}
       />
       <div
         className={`picker${picker.open ? " show" : ""}`}
@@ -57,13 +58,14 @@ export function AssetPickerSheet() {
         <div className="pk-grab" />
         <div className="pk-head">
           <span className="pk-t">添加 CONTEXT 资产</span>
-          <span className="pk-x" onClick={closePicker}>✕</span>
+          <span className="pk-x" data-testid="pk-x" onClick={dismiss}>✕</span>
         </div>
         <div className="pk-scroll">
           {PICKER_ROWS.map((row, i) => (
             <div
               key={i}
               className={`pk-row${selected.has(i) ? " sel" : ""}`}
+              data-testid={`pk-row-${i}`}
               onClick={() => toggleRow(i)}
             >
               <span className={`pk-i bg-${row.cls}`}>{row.icon}</span>

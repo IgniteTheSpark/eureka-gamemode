@@ -72,7 +72,11 @@ export interface CtxChip {
   title: string;
 }
 
-const DEFAULT_SESSION_CTX = "今日闪念 · 周二 6/2 · daily";
+function todayCtx(): string {
+  const d = new Date();
+  const wd = ["周日","周一","周二","周三","周四","周五","周六"][d.getDay()];
+  return `今日闪念 · ${wd} ${d.getMonth()+1}/${d.getDate()} · daily`;
+}
 
 // ── Context type (additive — T11 will extend) ────────────────────────
 
@@ -154,11 +158,11 @@ export const GameModeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Slice: session-context (T10)
   const [pastMode, setPastMode] = useState(false);
-  const [sessionCtx, setSessionCtx] = useState(DEFAULT_SESSION_CTX);
+  const [sessionCtx, setSessionCtx] = useState(todayCtx);
 
   const backToToday = () => {
     setPastMode(false);
-    setSessionCtx(DEFAULT_SESSION_CTX);
+    setSessionCtx(todayCtx());
   };
 
   const viewPastDaily = (label: string) => {
