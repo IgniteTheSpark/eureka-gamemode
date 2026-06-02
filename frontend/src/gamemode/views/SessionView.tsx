@@ -5,15 +5,10 @@ import {
   taskProgress,
 } from "../gamemodeData";
 import type { GMTask } from "../gamemodeData";
+import { useGameMode } from "../gamemodeStore";
 
-interface Props {
-  ctx: string;
-  pastMode?: boolean;
-  onOpenDrawer?: () => void;
-  onBackToday?: () => void;
-}
-
-export function SessionView({ ctx, pastMode, onOpenDrawer, onBackToday }: Props) {
+export function SessionView() {
+  const { sessionCtx, pastMode, openDrawer, backToToday } = useGameMode();
   const [tasks, setTasks] = useState<GMTask[]>(SAMPLE_TASKS.map(t => ({ ...t })));
   const [open, setOpen] = useState(true);
 
@@ -31,12 +26,12 @@ export function SessionView({ ctx, pastMode, onOpenDrawer, onBackToday }: Props)
         id="sessionVbar"
         data-testid="sessionVbar"
       >
-        <span className="vb-ctx">{ctx}</span>
+        <span className="vb-ctx">{sessionCtx}</span>
         <div className="vb-actions">
           <span
             className="today-pill"
             data-testid="backToday"
-            onClick={() => onBackToday?.()}
+            onClick={() => backToToday()}
           >
             ↩ 回到今天
           </span>
@@ -44,7 +39,7 @@ export function SessionView({ ctx, pastMode, onOpenDrawer, onBackToday }: Props)
             className="iconbtn"
             data-drawer
             data-testid="session-drawer-btn"
-            onClick={() => onOpenDrawer?.()}
+            onClick={() => openDrawer()}
           >
             <i></i>
             <i className="short"></i>

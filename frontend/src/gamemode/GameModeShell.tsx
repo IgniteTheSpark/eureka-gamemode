@@ -7,6 +7,7 @@ import { AssetsView } from "./views/AssetsView";
 import { CollectionOverlay } from "./overlays/CollectionOverlay";
 import { PetDetailOverlay } from "./overlays/PetDetailOverlay";
 import { Pet } from "./Pet";
+import { SessionDrawer } from "./SessionDrawer";
 import { GameModeProvider } from "./gamemodeStore";
 
 export function GameModeShell() {
@@ -26,7 +27,7 @@ export function GameModeShell() {
             <TimeView />
           </section>
           <section className="view" data-testid="view-session">
-            <SessionView ctx="今日闪念 · 周二 6/2 · daily" />
+            <SessionView />
           </section>
           <section className="view" data-testid="view-assets">
             <AssetsView />
@@ -46,6 +47,9 @@ export function GameModeShell() {
 
         {/* Pet detail overlay (static growth page placeholder) */}
         <PetDetailOverlay />
+
+        {/* Session history drawer (scrim + aside) */}
+        <SessionDrawer />
       </div>
     </GameModeProvider>
   );

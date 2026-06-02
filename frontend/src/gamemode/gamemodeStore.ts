@@ -8,7 +8,11 @@
  *   - detail: { open: boolean } + openDetail() + closeDetail()
  *   - drawer: { open: boolean } + openDrawer() + closeDrawer()
  *
- * Extensibility contract (T10/T11 will append):
+ * T10 additions:
+ *   - session-context: pastMode, sessionCtx, backToToday(), viewPastDaily()
+ *   - thread: { open, name, sub } + openThread() + closeThread()
+ *
+ * Extensibility contract (T11 will append):
  *   - Add a new useState per slice inside GameModeProvider.
  *   - Spread the new slice + actions into the ctx value object.
  *   - Widen GameModeCtx with the new fields.
@@ -32,7 +36,16 @@ export interface DrawerState {
   open: boolean;
 }
 
-// ── Context type (additive — T10/T11 will extend) ────────────────────────
+// T10: thread slice
+export interface ThreadState {
+  open: boolean;
+  name: string;
+  sub: string;
+}
+
+const DEFAULT_SESSION_CTX = "今日闪念 · 周二 6/2 · daily";
+
+// ── Context type (additive — T11 will extend) ────────────────────────
 
 export interface GameModeCtx {
   // T8: collection overlay
@@ -50,10 +63,18 @@ export interface GameModeCtx {
   openDrawer: () => void;
   closeDrawer: () => void;
 
-  // T10/T11 will add:
-  // cardDetail, thread, picker, pastMode, ctx,
-  // openCardDetail, openThread, openPicker,
-  // backToToday, viewPastDaily — extend the value spread in GameModeProvider.
+  // T10: session-context slice
+  pastMode: boolean;
+  sessionCtx: string;
+  backToToday: () => void;
+  viewPastDaily: (label: string) => void;
+
+  // T10: thread slice (ThreadOverlay component is T11)
+  thread: ThreadState;
+  openThread: (name: string, sub: string) => void;
+  closeThread: () => void;
+
+  // T11 will add: cardDetail, picker, openCardDetail, openPicker, closePicker
 }
 
 // ── Internal context ─────────────────────────────────────────────────────────
@@ -88,6 +109,35 @@ export const GameModeProvider: React.FC<{ children: React.ReactNode }> = ({
   const openDrawer = () => setDrawer({ open: true });
   const closeDrawer = () => setDrawer({ open: false });
 
+  // Slice: session-context (T10)
+  const [pastMode, setPastMode] = useState(false);
+  const [sessionCtx, setSessionCtx] = useState(DEFAULT_SESSION_CTX);
+
+  const backToToday = () => {
+    setPastMode(false);
+    setSessionCtx(DEFAULT_SESSION_CTX);
+  };
+
+  const viewPastDaily = (label: string) => {
+    setPastMode(true);
+    setSessionCtx(`${label} · 历史回放 · daily`);
+    setDrawer({ open: false });
+  };
+
+  // Slice: thread (T10 state; ThreadOverlay component is T11)
+  const [thread, setThread] = useState<ThreadState>({
+    open: false,
+    name: "",
+    sub: "",
+  });
+
+  const openThread = (name: string, sub: string) => {
+    setThread({ open: true, name, sub });
+    setDrawer({ open: false });
+  };
+
+  const closeThread = () => setThread((prev) => ({ ...prev, open: false }));
+
   const value: GameModeCtx = {
     collection,
     openCollection,
@@ -98,6 +148,13 @@ export const GameModeProvider: React.FC<{ children: React.ReactNode }> = ({
     drawer,
     openDrawer,
     closeDrawer,
+    pastMode,
+    sessionCtx,
+    backToToday,
+    viewPastDaily,
+    thread,
+    openThread,
+    closeThread,
   };
 
   return React.createElement(GameModeContext.Provider, { value }, children);
