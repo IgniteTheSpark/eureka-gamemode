@@ -5,6 +5,8 @@ import { SessionView } from "./views/SessionView";
 import { TimeView } from "./views/TimeView";
 import { AssetsView } from "./views/AssetsView";
 import { CollectionOverlay } from "./overlays/CollectionOverlay";
+import { PetDetailOverlay } from "./overlays/PetDetailOverlay";
+import { Pet } from "./Pet";
 import { GameModeProvider } from "./gamemodeStore";
 
 export function GameModeShell() {
@@ -38,6 +40,12 @@ export function GameModeShell() {
 
         {/* CollectionOverlay is absolute push-screen, outside the track */}
         <CollectionOverlay />
+
+        {/* 球球 pet spans all views (absolute, z-index 60) */}
+        <Pet />
+
+        {/* Pet detail overlay (static growth page placeholder) */}
+        <PetDetailOverlay />
       </div>
     </GameModeProvider>
   );
