@@ -1,4 +1,4 @@
-import { Wrench, AlertCircle, Bookmark, FileText, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
+import { AlertCircle, Bookmark, FileText, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import { AssetCardInChat } from "./AssetCardInChat";
@@ -71,7 +71,7 @@ function AgentBubble({
           <PartRenderer
             key={idx}
             part={part}
-            streaming={streaming}
+            streaming={!!streaming}
             isLast={idx === parts.length - 1}
             onOpenCard={(card, payload, sourceSessionId) => setDrawerCard({ card, payload, sourceSessionId: sourceSessionId ?? null })}
             onOpenReport={setOpenReport}

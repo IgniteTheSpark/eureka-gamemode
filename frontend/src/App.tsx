@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useSWRConfig } from "swr";
 
 import { AppShell } from "@/components/shell/AppShell";
+import { GameModeShell } from "@/gamemode/GameModeShell";
 import { PhoneFrame } from "@/components/shell/PhoneFrame";
 import { ListeningOverlay } from "@/components/shell/ListeningOverlay";
 import { ChatPage } from "@/pages/ChatPage";
@@ -68,8 +69,9 @@ export default function App() {
             <NotificationsBridge />
             <ListeningOverlay />
             <Routes>
+              <Route index element={<Navigate to="/game" replace />} />
+              <Route path="/game" element={<GameModeShell />} />
               <Route element={<AppShell />}>
-                <Route index element={<Navigate to="/chat" replace />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/library/*" element={<LibraryPage />} />

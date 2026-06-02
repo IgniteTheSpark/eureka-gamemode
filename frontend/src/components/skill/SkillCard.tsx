@@ -279,6 +279,42 @@ function IconTile({
 }
 
 /**
+ * CheckTile — a standalone checkable square used in the StackedCard layout
+ * when the skill has a "check" action. Replaces the icon tile entirely so
+ * the whole left block communicates done/undone without a floating overlay.
+ *
+ * Unchecked: bordered box (same accent edge as CardShell, transparent fill).
+ * Checked:   filled with accent icon-bg + Check glyph.
+ */
+function CheckTile({
+  done, accent, onClick,
+}: {
+  done: boolean;
+  accent: AccentColor;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  const a = ACCENT[accent];
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={done ? "标记未完成" : "标记完成"}
+      className={[
+        "shrink-0 h-8 w-8 rounded-eu-md",
+        "flex items-center justify-center",
+        "border transition-all duration-eu-fast ease-eu-out",
+        "active:scale-90",
+        done
+          ? `${a.iconBg} ${a.border} ${a.iconFg}`
+          : `bg-transparent ${a.border} ${a.iconFg} hover:${a.iconBg}`,
+      ].join(" ")}
+    >
+      {done && <Check size={16} strokeWidth={2.5} />}
+    </button>
+  );
+}
+
+/**
  * Async-task lifecycle statuses (external_ref / task cards). When a badge
  * meta-field carries one of these raw values, render it localized + colored
  * by state instead of the card's flat accent — this is the task-status UI for

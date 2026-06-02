@@ -97,12 +97,6 @@ const CORE_TILES: TileKind[] = [
   { key: "external_ref", to: "/library/external_ref", label: "外部", icon: "🔗", accent: "blue"    },
 ];
 
-// render_spec.accent_color → LibAccent, for the core-tile fallback.
-const RENDER_TO_LIB: Record<AccentColor, LibAccent> = {
-  blue: "blue", amber: "amber", green: "green", purple: "purple",
-  red: "amber", gray: "neutral", neutral: "neutral",
-};
-
 // SkillsGrid uses a slimmer accent palette; map the registry's render_spec
 // colors into it. red/gray fold into amber/neutral.
 const RENDER_TO_GRID: Record<AccentColor, TileAccent> = {
