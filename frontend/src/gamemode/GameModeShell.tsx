@@ -1,28 +1,13 @@
 import "./gamemode.css";
 import { useViewSwipe } from "./useViewSwipe";
-
-const SEG_LABELS: [string, string, string] = ["时间", "闪念", "资产"];
+import { Headbar } from "./Headbar";
 
 export function GameModeShell() {
   const { view, setView, trackRef, dragging } = useViewSwipe();
 
   return (
     <div className="gm" data-testid="gm-root">
-      {/* TEMPORARY switcher — Task 5 will replace with the real Headbar */}
-      <div className="headbar">
-        <div className="switcher">
-          {SEG_LABELS.map((label, k) => (
-            <span
-              key={label}
-              className={`seg${view === k ? " on" : ""}`}
-              data-testid={`seg-${label}`}
-              onClick={() => setView(k)}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
+      <Headbar view={view} onSelect={setView} />
 
       <div
         className={`track${dragging ? " dragging" : ""}`}
